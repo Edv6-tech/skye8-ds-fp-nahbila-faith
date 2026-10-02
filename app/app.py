@@ -1144,26 +1144,35 @@ with tab_routes:
         emmanuel_field = emmanuel_df[emmanuel_df["recommended_channel"] == "FIELD_VISIT"]
         savings = calculate_benskin_route_savings(emmanuel_df)
         
+        n_vis = savings.get('n_field_visits', 0)
+        km_sav = savings.get('km_saved', 0.0)
+        unclust_km = savings.get('unclustered_km', 0.0)
+        clust_km = savings.get('clustered_km', 0.0)
+        pct_sav = savings.get('pct_distance_saved', 0.0)
+        fuel_sav = savings.get('fuel_saved_liters', 0.0)
+        cash_sav = savings.get('fuel_cash_saved_fcfa', 0.0)
+        n_zones = len(emmanuel_field['bamenda_quarter'].unique()) if not emmanuel_field.empty else 0
+
         st.markdown(textwrap.dedent(f"""
         <div class="metric-grid">
             <div class="metric-card">
                 <div class="metric-label">Scheduled Field Visits</div>
-                <div class="metric-value">{savings['n_field_visits']}</div>
-                <div class="metric-badge">Across {len(emmanuel_field['bamenda_quarter'].unique())} urban zones</div>
+                <div class="metric-value">{n_vis}</div>
+                <div class="metric-badge">Across {n_zones} urban zones</div>
             </div>
             <div class="metric-card">
                 <div class="metric-label">Transit Distance Cut</div>
-                <div class="metric-value">{savings['km_saved']} <span style="font-size:12px; color:#84756A;">KM</span></div>
-                <div class="metric-badge">Cut from {savings['unclustered_km']} km to {savings['clustered_km']} km (-{savings['pct_distance_saved']}%)</div>
+                <div class="metric-value">{km_sav} <span style="font-size:12px; color:#84756A;">KM</span></div>
+                <div class="metric-badge">Cut from {unclust_km} km to {clust_km} km (-{pct_sav}%)</div>
             </div>
             <div class="metric-card">
                 <div class="metric-label">Fuel Saved (Essence)</div>
-                <div class="metric-value" style="color: #2E5A36;">{savings['fuel_saved_liters']} <span style="font-size:12px; color:#2E5A36;">L</span></div>
+                <div class="metric-value" style="color: #2E5A36;">{fuel_sav} <span style="font-size:12px; color:#2E5A36;">L</span></div>
                 <div class="metric-badge">@ 30 km / liter on motorcycle</div>
             </div>
             <div class="metric-card">
                 <div class="metric-label">Motorcycle Cash Saved</div>
-                <div class="metric-value" style="color: #A67C48;">{savings['fuel_cash_saved_fcfa']:,.0f} <span style="font-size:12px; color:#A67C48;">FCFA</span></div>
+                <div class="metric-value" style="color: #A67C48;">{cash_sav:,.0f} <span style="font-size:12px; color:#A67C48;">FCFA</span></div>
                 <div class="metric-badge">@ 850 FCFA/liter in Bamenda</div>
             </div>
         </div>

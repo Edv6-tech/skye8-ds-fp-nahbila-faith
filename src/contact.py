@@ -177,6 +177,7 @@ def calculate_benskin_route_savings(df_officer: pd.DataFrame) -> Dict[str, Any]:
     n_visits = len(field_visits)
     if n_visits == 0:
         return {
+            "n_field_visits": 0,
             "unclustered_km": 0.0,
             "clustered_km": 0.0,
             "km_saved": 0.0,
