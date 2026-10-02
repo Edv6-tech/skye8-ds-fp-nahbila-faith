@@ -120,3 +120,56 @@ def test_benskin_route_savings():
     assert savings["km_saved"] > 0
     assert savings["fuel_cash_saved_fcfa"] > 0
     assert savings["pct_distance_saved"] > 30.0
+
+
+def test_adaptable_prioritiser(dummy_data):
+    X, y, ttc, ratio = dummy_data
+    from src.model import AdaptablePrioritiser
+    
+    clf = train_prioritiser(X, y, calibrate=True)
+    engine = AdaptablePrioritiser(clf_model=clf)
+    
+    # 1. Base prediction
+    p_base = engine.predict_adapted_probability(X)
+    assert len(p_base) == len(X)
+    
+    # 2. Branch Archetype Adaptation
+    offset = engine.adapt_to_branch("Civil Servant Payroll (Up Station)")
+    p_civil = engine.predict_adapted_probability(X)
+    assert offset > 0
+    assert np.mean(p_civil) > np.mean(p_base)
+    
+    # 3. Seasonal Adaptation
+    engine.adapt_to_season(harvest_boost=0.20, school_fee_drag=0.0)
+    p_harvest = engine.predict_adapted_probability(X)
+    assert np.mean(p_harvest) > np.mean(p_civil)
+    
+    # 4. Bayesian Online Feedback Adaptation
+    X_acc = X.copy()
+    X_acc["SK_ID_CURR"] = np.arange(100, 100 + len(X))
+    engine.incorporate_field_feedback(100, "Cured & Settled in Full")
+    engine.incorporate_field_feedback(101, "Severe Hardship / Bereavement Shock")
+    p_feedback = engine.predict_adapted_probability(X_acc)
+    assert p_feedback[0] > p_base[0]
+    assert p_feedback[1] < p_base[1]
+    
+    # 5. Missing Feature Robustness
+    X_missing = X.drop(columns=["bureau_total_debt", "pos_cash_max_dpd"], errors="ignore")
+    p_missing = engine.predict_adapted_probability(X_missing)
+    assert len(p_missing) == len(X_missing)
+    assert not np.isnan(p_missing).any()
+    
+    # 6. Multi-Objective Portfolio Re-ranking
+    df_port = X_acc.copy()
+    df_port["is_vulnerable"] = False
+    df_port.loc[0:5, "is_vulnerable"] = True
+    
+    ranked_ev = engine.rank_portfolio(df_port, objective="Maximum Cash Flow (EV)")
+    assert "rank" in ranked_ev.columns
+    assert ranked_ev["expected_gross_recovery_fcfa"].iloc[0] >= ranked_ev["expected_gross_recovery_fcfa"].iloc[-1]
+    
+    ranked_cures = engine.rank_portfolio(df_port, objective="Maximum Customer Cure Volume")
+    assert ranked_cures["recovery_probability"].iloc[0] >= ranked_cures["recovery_probability"].iloc[-1]
+    
+    ranked_vuln = engine.rank_portfolio(df_port, objective="Vulnerable & Community First")
+    assert ranked_vuln["is_vulnerable"].iloc[0] == True

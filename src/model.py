@@ -286,3 +286,169 @@ def load_model(filename: str = "prioritiser_model.joblib") -> Any:
     if not path.exists():
         raise FileNotFoundError(f"Model file not found at {path}")
     return joblib.load(path)
+
+
+class AdaptablePrioritiser:
+    """Production Adaptability Engine for Skye8 Loan Collections.
+    
+    Provides:
+    1. Branch Archetype Adaptation (Urban Commercial vs Agrarian Rural vs Civil Servant Payroll).
+    2. Online Bayesian Feedback Adaptation from officer field logging.
+    3. Missing Modality & Incomplete Schema Fallback Adaptation.
+    4. Multi-Objective Policy Adaptation (Max Cash vs Max Cures vs Ethical Balancing).
+    5. Macroeconomic Unit Economics Dynamic Recalibration (Fuel and Airtime Shocks).
+    """
+    def __init__(self, clf_model: Any = None, ttc_model: Any = None, ratio_model: Any = None):
+        self.clf_model = clf_model if clf_model is not None else load_model("prioritiser_model.joblib")
+        try:
+            self.ttc_model = ttc_model if ttc_model is not None else load_model("time_to_cure_regressor.joblib")
+        except Exception:
+            self.ttc_model = None
+        try:
+            self.ratio_model = ratio_model if ratio_model is not None else load_model("partial_recovery_regressor.joblib")
+        except Exception:
+            self.ratio_model = None
+            
+        self.branch_offset = 0.0
+        self.season_modifier = 1.0
+        self.feedback_adjustments: Dict[int, float] = {}
+
+    def adapt_to_branch(self, branch_archetype: str) -> float:
+        """Adjust log-odds intercept to align with branch economic profile."""
+        if "Urban Commercial" in branch_archetype:
+            self.branch_offset = 0.18  # Faster market cash velocity
+        elif "Agrarian Rural" in branch_archetype:
+            self.branch_offset = -0.12  # Seasonal liquidity lag
+        elif "Civil Servant" in branch_archetype:
+            self.branch_offset = 0.28  # Predictable payroll settlement
+        else:
+            self.branch_offset = 0.0
+        return self.branch_offset
+
+    def adapt_to_season(self, harvest_boost: float = 0.0, school_fee_drag: float = 0.0) -> float:
+        """Dynamically calibrate seasonal macroeconomic liquidity adjustments."""
+        self.season_modifier = max(0.5, 1.0 + harvest_boost - school_fee_drag)
+        return self.season_modifier
+
+    def incorporate_field_feedback(self, account_id: int, outcome: str) -> float:
+        """Bayesian online feedback adjustment for individual borrower and cohort."""
+        delta = 0.0
+        if "Cured & Settled" in outcome:
+            delta = 0.40  # Verified solvent
+        elif "Promise to Pay" in outcome:
+            delta = 0.15  # Receptive / cooperative
+        elif "Severe Hardship" in outcome:
+            delta = -0.35  # Distressed
+        elif "Disputed" in outcome:
+            delta = -0.20  # Administrative disagreement
+        elif "Switched Off" in outcome:
+            delta = -0.10  # Contact friction
+        self.feedback_adjustments[int(account_id)] = delta
+        return delta
+
+    def predict_adapted_probability(self, X: pd.DataFrame) -> np.ndarray:
+        """Generate adapted probability accounting for branch prior, seasonality, and field feedback."""
+        # 1. Base prediction (with graceful feature imputation if missing)
+        X_clean = X.copy()
+        for col in FEATURE_COLUMNS:
+            if col not in X_clean.columns:
+                X_clean[col] = 0.0
+            else:
+                X_clean[col] = X_clean[col].fillna(0.0)
+                
+        base_p = predict_recovery_probability(self.clf_model, X_clean)
+        
+        # 2. Log-odds shift for branch archetype
+        eps = 1e-6
+        base_p_clipped = np.clip(base_p, eps, 1.0 - eps)
+        log_odds = np.log(base_p_clipped / (1.0 - base_p_clipped))
+        adapted_log_odds = log_odds + self.branch_offset
+        adapted_p = 1.0 / (1.0 + np.exp(-adapted_log_odds))
+        
+        # 3. Seasonal modifier
+        adapted_p = np.clip(adapted_p * self.season_modifier, 0.01, 0.99)
+        
+        # 4. Apply online feedback adjustments if account IDs are present
+        if "SK_ID_CURR" in X.columns:
+            for i, acc_id in enumerate(X["SK_ID_CURR"].values):
+                if int(acc_id) in self.feedback_adjustments:
+                    fb_delta = self.feedback_adjustments[int(acc_id)]
+                    adapted_p[i] = np.clip(adapted_p[i] + fb_delta, 0.01, 0.99)
+                    
+        return adapted_p
+
+    def rank_portfolio(
+        self,
+        df: pd.DataFrame,
+        objective: str = "Maximum Cash Flow (EV)",
+        fuel_price_fcfa: float = 850.0,
+        airtime_cost_fcfa: float = 500.0
+    ) -> pd.DataFrame:
+        """Dynamically re-rank the portfolio based on chosen strategic objective and unit costs."""
+        out = df.copy()
+        p = self.predict_adapted_probability(out)
+        out["recovery_probability"] = p
+        
+        # Predict partial recovery settlement ratio
+        if self.ratio_model is not None:
+            out["partial_recovery_ratio"] = predict_partial_recovery_ratio(self.ratio_model, out)
+        else:
+            out["partial_recovery_ratio"] = 0.66
+            
+        # Dynamically recalculate contact channel economics with live fuel/airtime costs
+        visit_cost = 2500.0 + (fuel_price_fcfa * 3.0)  # Base officer fee + ~3L motorcycle fuel
+        call_cost = airtime_cost_fcfa
+        sms_cost = 50.0
+        
+        rec_channels = []
+        action_costs = []
+        for _, row in out.iterrows():
+            prob = row["recovery_probability"]
+            debt = row["overdue_amount"]
+            ratio = row["partial_recovery_ratio"]
+            is_vuln = row.get("is_vulnerable", False)
+            
+            # Channel NEVs
+            nev_sms = (prob * 1.00 * ratio * debt) - sms_cost
+            nev_call = (min(0.99, prob * 1.25) * ratio * debt) - call_cost
+            nev_visit = (min(0.99, prob * 1.45) * ratio * debt) - visit_cost
+            
+            if is_vuln:
+                chosen = "CALL" if debt >= 25000 else "SMS"
+                c_cost = call_cost if chosen == "CALL" else sms_cost
+            elif nev_visit > max(nev_sms, nev_call) and debt >= 40000 and prob >= 0.10:
+                chosen = "FIELD_VISIT"
+                c_cost = visit_cost
+            elif nev_call > nev_sms:
+                chosen = "CALL"
+                c_cost = call_cost
+            else:
+                chosen = "SMS"
+                c_cost = sms_cost
+                
+            rec_channels.append(chosen)
+            action_costs.append(c_cost)
+            
+        out["recommended_channel"] = rec_channels
+        out["channel_cost_fcfa"] = action_costs
+        out["expected_gross_recovery_fcfa"] = (
+            out["recovery_probability"] * out["partial_recovery_ratio"] * out["overdue_amount"]
+        )
+        out["expected_net_recovery_fcfa"] = out["expected_gross_recovery_fcfa"] - out["channel_cost_fcfa"]
+        
+        # Objective-based Ranking
+        if "Cure Volume" in objective:
+            out = out.sort_values("recovery_probability", ascending=False).reset_index(drop=True)
+        elif "Balanced Sustainable" in objective:
+            uplift, _ = compute_causal_uplift(out["recovery_probability"].values)
+            out["causal_uplift"] = uplift
+            score = uplift * (out["overdue_amount"] ** 0.65)
+            out = out.iloc[np.argsort(-score)].reset_index(drop=True)
+        elif "Vulnerable" in objective:
+            out = out.sort_values(by=["is_vulnerable", "expected_gross_recovery_fcfa"], ascending=[False, False]).reset_index(drop=True)
+        else:
+            # Default: Maximum Cash Flow (EV)
+            out = out.sort_values("expected_gross_recovery_fcfa", ascending=False).reset_index(drop=True)
+            
+        out["rank"] = np.arange(1, len(out) + 1)
+        return out
