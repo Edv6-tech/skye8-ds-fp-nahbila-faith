@@ -598,69 +598,67 @@ with tab_dossier:
         channel_tag_class = "tag-sms" if acc["recommended_channel"] == "SMS" else ("tag-call" if acc["recommended_channel"] == "CALL" else "tag-visit")
         vulnerable_tag = f'<span class="tag-vulnerable">Protected &bull; Senior / Hardship</span>' if acc["is_vulnerable"] else '<span class="tag-sms">Standard Operational Flow</span>'
         
-        # Render clean, dedented HTML to prevent markdown from turning it into a pre/code block
-        dossier_html = textwrap.dedent(f"""
-        <div class="dossier-card">
-            <div class="dossier-header">
-                <div>
-                    <span class="dossier-meta">Borrower Account Reference</span>
-                    <div class="dossier-id">Client #{acc['SK_ID_CURR']} &bull; Loan Ref {acc['SK_ID_PREV']}</div>
-                </div>
-                <div>
-                    <span class="{channel_tag_class}">Recommended Action: {acc['recommended_channel']}</span>
-                    &nbsp;
-                    {vulnerable_tag}
-                </div>
-            </div>
-            
-            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 24px;">
-                <div>
-                    <div class="metric-label">Overdue Balance</div>
-                    <div style="font-size: 20px; font-weight: 600; color: #1F1815;">{acc['overdue_amount']:,.0f} FCFA</div>
-                    <div style="font-size: 11px; color: #8C7E75;">15 Days Past Due</div>
-                </div>
-                <div>
-                    <div class="metric-label">Recovery Probability</div>
-                    <div style="font-size: 20px; font-weight: 600; color: #C5A059;">{acc['recovery_probability']:.1%}</div>
-                    <div style="font-size: 11px; color: #8C7E75;">Calibrated ML Estimate</div>
-                </div>
-                <div>
-                    <div class="metric-label">Assigned Officer</div>
-                    <div style="font-size: 18px; font-weight: 600; color: #1F1815;">{acc['assigned_officer']}</div>
-                    <div style="font-size: 11px; color: #8C7E75;">Mezam / Bamenda Unit</div>
-                </div>
-                <div>
-                    <div class="metric-label">Net Yield Expectation</div>
-                    <div style="font-size: 20px; font-weight: 600; color: #2E5A36;">{acc['expected_net_recovery_fcfa']:,.0f} FCFA</div>
-                    <div style="font-size: 11px; color: #8C7E75;">Net of Action Cost ({acc['channel_cost_fcfa']:,.0f} FCFA)</div>
-                </div>
-            </div>
-            
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; padding-top: 16px; border-top: 1px solid #F0EAE2;">
-                <div>
-                    <div class="metric-label">Behavioral Track Record (Pre-Arrears)</div>
-                    <ul style="font-size: 13px; color: #4A3E36; line-height: 1.8; margin-top: 6px; padding-left: 18px;">
-                        <li>Prior Instalment Count: <strong>{int(acc['prior_instalments_count'])} scheduled payments</strong></li>
-                        <li>Historical Delinquency Rate: <strong>{acc['prior_late_ratio']:.1%} of past instalments</strong></li>
-                        <li>Past Severe Delinquencies (15+ days): <strong>{int(acc['prior_severe_late_count'])}</strong></li>
-                        <li>Average Historical Delay: <strong>{acc['prior_avg_days_late']:.1f} days</strong></li>
-                        <li>Repayment Compliance Ratio: <strong>{acc['prior_payment_ratio']:.1%}</strong></li>
-                    </ul>
-                </div>
-                <div>
-                    <div class="metric-label">Officer Engagement Rationale & Script</div>
-                    <div style="background-color: #FAF8F5; border: 1px solid #EAE3DA; border-radius: 8px; padding: 14px; margin-top: 6px;">
-                        <div style="font-size: 13px; font-weight: 600; color: #1F1815; margin-bottom: 4px;">Strategic Reasoning:</div>
-                        <div style="font-size: 12.5px; color: #5C5047; line-height: 1.5; margin-bottom: 10px;">{acc['action_reason']}</div>
-                        <div style="font-size: 13px; font-weight: 600; color: #1F1815; margin-bottom: 4px;">Recommended Dialogue Tone:</div>
-                        <div style="font-size: 12.5px; color: #5C5047; font-style: italic;">
-                            "{'Acknowledge customer loyalty, verify hardship context, and offer flexible 14-day instalment restructuring.' if acc['is_vulnerable'] else 'Polite notification of 15-day arrears mark; confirm commitment to settle within 30-day grace cycle.'}"
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        """)
+        # Flush-left HTML string with zero leading spaces ensures markdown NEVER creates a code block
+        script_tone = "Acknowledge customer loyalty, verify hardship context, and offer flexible 14-day instalment restructuring." if acc['is_vulnerable'] else "Polite notification of 15-day arrears mark; confirm commitment to settle within 30-day grace cycle."
+        
+        dossier_html = f"""<div class="dossier-card">
+<div class="dossier-header">
+<div>
+<span class="dossier-meta">Borrower Account Reference</span>
+<div class="dossier-id">Client #{acc['SK_ID_CURR']} &bull; Loan Ref {acc['SK_ID_PREV']}</div>
+</div>
+<div>
+<span class="{channel_tag_class}">Recommended Action: {acc['recommended_channel']}</span>
+&nbsp;
+{vulnerable_tag}
+</div>
+</div>
+<div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 24px;">
+<div>
+<div class="metric-label">Overdue Balance</div>
+<div style="font-size: 20px; font-weight: 600; color: #1F1815;">{acc['overdue_amount']:,.0f} FCFA</div>
+<div style="font-size: 11px; color: #8C7E75;">15 Days Past Due</div>
+</div>
+<div>
+<div class="metric-label">Recovery Probability</div>
+<div style="font-size: 20px; font-weight: 600; color: #C5A059;">{acc['recovery_probability']:.1%}</div>
+<div style="font-size: 11px; color: #8C7E75;">Calibrated ML Estimate</div>
+</div>
+<div>
+<div class="metric-label">Assigned Officer</div>
+<div style="font-size: 18px; font-weight: 600; color: #1F1815;">{acc['assigned_officer']}</div>
+<div style="font-size: 11px; color: #8C7E75;">Mezam / Bamenda Unit</div>
+</div>
+<div>
+<div class="metric-label">Net Yield Expectation</div>
+<div style="font-size: 20px; font-weight: 600; color: #2E5A36;">{acc['expected_net_recovery_fcfa']:,.0f} FCFA</div>
+<div style="font-size: 11px; color: #8C7E75;">Net of Action Cost ({acc['channel_cost_fcfa']:,.0f} FCFA)</div>
+</div>
+</div>
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; padding-top: 16px; border-top: 1px solid #F0EAE2;">
+<div>
+<div class="metric-label">Behavioral Track Record (Pre-Arrears)</div>
+<ul style="font-size: 13px; color: #4A3E36; line-height: 1.8; margin-top: 6px; padding-left: 18px;">
+<li>Prior Instalment Count: <strong>{int(acc['prior_instalments_count'])} scheduled payments</strong></li>
+<li>Historical Delinquency Rate: <strong>{acc['prior_late_ratio']:.1%} of past instalments</strong></li>
+<li>Past Severe Delinquencies (15+ days): <strong>{int(acc['prior_severe_late_count'])}</strong></li>
+<li>Average Historical Delay: <strong>{acc['prior_avg_days_late']:.1f} days</strong></li>
+<li>Repayment Compliance Ratio: <strong>{acc['prior_payment_ratio']:.1%}</strong></li>
+</ul>
+</div>
+<div>
+<div class="metric-label">Officer Engagement Rationale & Script</div>
+<div style="background-color: #FAF8F5; border: 1px solid #EAE3DA; border-radius: 8px; padding: 14px; margin-top: 6px;">
+<div style="font-size: 13px; font-weight: 600; color: #1F1815; margin-bottom: 4px;">Strategic Reasoning:</div>
+<div style="font-size: 12.5px; color: #5C5047; line-height: 1.5; margin-bottom: 10px;">{acc['action_reason']}</div>
+<div style="font-size: 13px; font-weight: 600; color: #1F1815; margin-bottom: 4px;">Recommended Dialogue Tone:</div>
+<div style="font-size: 12.5px; color: #5C5047; font-style: italic;">
+"{script_tone}"
+</div>
+</div>
+</div>
+</div>
+</div>"""
         st.markdown(dossier_html, unsafe_allow_html=True)
 
 # TAB 2: PRIORITISED TABLE VIEW
