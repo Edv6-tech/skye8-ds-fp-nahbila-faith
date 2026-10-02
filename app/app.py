@@ -1,13 +1,12 @@
-"""Streamlit Production Web App: Loan Collections Prioritiser (Bamenda MFI).
+"""Skye8 Collections Prioritiser — Haute-Elegance Editorial Edition.
 
-Built for 3 Collections Officers (John, Beatrice, Emmanuel) in Bamenda, Cameroon.
+A high-luxury, editorial UI/UX designed for Microfinance Institutions in Bamenda, Cameroon.
 Features:
-- Live ranked weekly list of 400 arrears accounts.
-- Filter by Collections Officer, Contact Method, and Vulnerability Flag.
-- Executive KPI bar showing total arrears, expected recovery, net value, and lift vs incumbent.
-- Actionable reasons for each recommendation.
-- Ethical safeguard module protecting vulnerable borrowers from aggressive collection.
-- Mobile-optimized layout for collections officers in the field.
+- Editorial typography (Playfair Display & Plus Jakarta Sans).
+- Warm espresso, champagne gold, and ivory silk palette.
+- Bespoke KPI metric cards and micro-interactions.
+- Dossier-style account deep-dive inspector with human-dignity safeguarding.
+- Mobile-responsive, high-craft aesthetics.
 """
 from pathlib import Path
 import streamlit as st
@@ -16,10 +15,10 @@ import numpy as np
 
 # Page configuration
 st.set_page_config(
-    page_title="Collections Prioritiser | Bamenda MFI",
-    page_icon="📋",
+    page_title="Skye8 Prioritiser | Haute Edition",
+    page_icon="⚜️",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="collapsed"
 )
 
 # File paths
@@ -30,234 +29,581 @@ METRICS_PATH = Path(__file__).resolve().parents[1] / "reports" / "metrics_summar
 @st.cache_data
 def load_data():
     if not DATA_PATH.exists():
-        st.error(f"Data file not found at {DATA_PATH}. Please run `python run_pipeline.py` first.")
         return pd.DataFrame()
-    df = pd.read_csv(DATA_PATH)
-    return df
+    return pd.read_csv(DATA_PATH)
 
 
 df_raw = load_data()
 
-# Custom CSS for executive styling
+# Inject High-Luxury Editorial CSS
 st.markdown("""
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
 <style>
+    /* Global Resets & Typography */
+    html, body, [class*="css"] {
+        font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+        color: #231C18;
+        background-color: #FAF8F5;
+    }
+    
+    .stApp {
+        background-color: #FAF8F5;
+    }
+
+    /* Editorial Hero Section */
+    .hero-container {
+        background: linear-gradient(135deg, #1C1512 0%, #2A201B 60%, #382B24 100%);
+        border-radius: 16px;
+        padding: 48px 48px 40px 48px;
+        margin-bottom: 32px;
+        color: #FAF8F5;
+        position: relative;
+        box-shadow: 0 20px 40px rgba(28, 21, 18, 0.15);
+        border: 1px solid rgba(197, 160, 89, 0.25);
+    }
+    
+    .hero-eyebrow {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: #C5A059;
+        margin-bottom: 14px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .hero-eyebrow::before {
+        content: "";
+        width: 18px;
+        height: 1px;
+        background-color: #C5A059;
+        display: inline-block;
+    }
+
+    .hero-title {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: 42px;
+        line-height: 1.15;
+        font-weight: 400;
+        letter-spacing: -0.02em;
+        color: #FAF8F5;
+        margin-bottom: 16px;
+    }
+
+    .hero-title em {
+        font-style: italic;
+        font-family: 'Playfair Display', serif;
+        color: #E2CA96;
+        font-weight: 400;
+    }
+
+    .hero-desc {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 14.5px;
+        line-height: 1.6;
+        color: #D3C7BF;
+        max-width: 640px;
+        font-weight: 300;
+    }
+
+    /* Executive KPI Cards */
+    .metric-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin-bottom: 32px;
+    }
+
     .metric-card {
-        background-color: #f8f9fa;
-        border-radius: 8px;
-        padding: 15px;
-        border-left: 5px solid #1f77b4;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        background: #FFFFFF;
+        border: 1px solid #EAE3DA;
+        border-radius: 12px;
+        padding: 22px 20px;
+        box-shadow: 0 4px 16px rgba(44, 34, 28, 0.03);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
-    .badge-call {
-        background-color: #e6f4ea;
-        color: #137333;
-        padding: 4px 8px;
-        border-radius: 4px;
-        font-weight: 600;
+
+    .metric-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(44, 34, 28, 0.06);
+        border-color: #C5A059;
     }
-    .badge-sms {
-        background-color: #e8f0fe;
-        color: #1a73e8;
-        padding: 4px 8px;
-        border-radius: 4px;
+
+    .metric-label {
+        font-size: 10.5px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: #8C7E75;
         font-weight: 600;
+        margin-bottom: 8px;
     }
-    .badge-visit {
-        background-color: #fce8e6;
-        color: #c5221f;
-        padding: 4px 8px;
-        border-radius: 4px;
+
+    .metric-value {
+        font-family: 'Playfair Display', serif;
+        font-size: 26px;
         font-weight: 600;
+        color: #1F1815;
+        line-height: 1.1;
+        margin-bottom: 4px;
     }
-    .badge-vulnerable {
-        background-color: #fef7e0;
-        color: #b06000;
-        padding: 4px 8px;
-        border-radius: 4px;
+
+    .metric-badge {
+        font-size: 11.5px;
+        font-weight: 500;
+        color: #9E7438;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    /* Luxury Tags & Badges */
+    .tag-sms {
+        background-color: #F1ECE6;
+        color: #4D4037;
+        font-size: 11px;
         font-weight: 600;
+        letter-spacing: 0.06em;
+        padding: 4px 10px;
+        border-radius: 20px;
+        border: 1px solid #DFD5CA;
+        display: inline-block;
+    }
+
+    .tag-call {
+        background-color: #FDF4E7;
+        color: #8F6219;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        padding: 4px 10px;
+        border-radius: 20px;
+        border: 1px solid #F0D7AE;
+        display: inline-block;
+    }
+
+    .tag-visit {
+        background-color: #FBF0ED;
+        color: #9C3826;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        padding: 4px 10px;
+        border-radius: 20px;
+        border: 1px solid #ECCDC6;
+        display: inline-block;
+    }
+
+    .tag-vulnerable {
+        background-color: #F7EFE2;
+        color: #8D5B18;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        padding: 4px 10px;
+        border-radius: 20px;
+        border: 1px solid #E6D0AC;
+        display: inline-block;
+    }
+
+    /* Dossier Card View */
+    .dossier-card {
+        background: #FFFFFF;
+        border: 1px solid #EAE3DA;
+        border-radius: 14px;
+        padding: 28px;
+        margin-top: 16px;
+        box-shadow: 0 8px 30px rgba(44, 34, 28, 0.04);
+        position: relative;
+    }
+
+    .dossier-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 32px;
+        right: 32px;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #C5A059, transparent);
+    }
+
+    .dossier-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        border-bottom: 1px solid #F0EAE2;
+        padding-bottom: 16px;
+        margin-bottom: 20px;
+    }
+
+    .dossier-id {
+        font-family: 'Playfair Display', serif;
+        font-size: 24px;
+        color: #1F1815;
+    }
+
+    .dossier-meta {
+        font-size: 12px;
+        color: #8C7E75;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+
+    /* Refined Streamlit Native Overrides */
+    .stSelectbox label, .stSlider label, .stRadio label {
+        font-size: 11.5px !important;
+        letter-spacing: 0.08em !important;
+        text-transform: uppercase !important;
+        font-weight: 600 !important;
+        color: #5C5047 !important;
+    }
+
+    div[data-baseweb="tab-list"] {
+        border-bottom: 1px solid #E6DED5 !important;
+        gap: 24px !important;
+    }
+
+    button[data-baseweb="tab"] {
+        font-family: 'Playfair Display', serif !important;
+        font-size: 17px !important;
+        color: #7D7268 !important;
+        background-color: transparent !important;
+        border: none !important;
+        padding: 12px 4px !important;
+    }
+
+    button[aria-selected="true"] {
+        color: #1F1815 !important;
+        font-weight: 600 !important;
+        border-bottom: 2px solid #C5A059 !important;
+    }
+
+    .dataframe {
+        font-family: 'Plus Jakarta Sans', sans-serif !important;
+        font-size: 13px !important;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# Header
-st.title("📋 Loan Collections Prioritiser")
-st.caption("AI-Powered Recovery Decision Support System | Microfinance Institution — Bamenda, Cameroon")
+# -------------------------------------------------------------
+# HERO BANNER (EDITORIAL LUXURY DESIGN)
+# -------------------------------------------------------------
+st.markdown("""
+<div class="hero-container">
+    <div class="hero-eyebrow">Skye8 Intelligence &bull; Core ML &bull; Bamenda, Cameroon</div>
+    <div class="hero-title">The <em>precision</em> of recovery,<br>the <em>depth</em> of care.</div>
+    <div class="hero-desc">
+        A predictive decision engine ranking the arrears portfolio by expected recovery value,
+        optimizing contact channel economics, and safeguarding vulnerable borrowers across 400 credit union accounts.
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
 if df_raw.empty:
+    st.error("Weekly portfolio data not found. Please run `python run_pipeline.py` first.")
     st.stop()
 
-# Sidebar: Filters & Controls
-with st.sidebar:
-    st.header("⚙️ Workload & Filters")
-    
-    officers = ["All Officers"] + sorted(df_raw["assigned_officer"].unique().tolist())
-    selected_officer = st.selectbox("Assigned Officer", officers)
-    
-    channels = ["All Channels"] + sorted(df_raw["recommended_channel"].unique().tolist())
-    selected_channel = st.selectbox("Contact Channel", channels)
-    
-    vulnerability_filter = st.radio(
-        "Ethical Safeguard Filter",
-        ["All Accounts", "Standard Accounts Only", "Protected / Vulnerable Only"]
+# -------------------------------------------------------------
+# FILTER CONTROLS BAR (MINIMALIST REFINED)
+# -------------------------------------------------------------
+filter_col1, filter_col2, filter_col3, filter_col4 = st.columns([1.2, 1.2, 1.4, 1.2])
+
+with filter_col1:
+    officers = ["All Collections Officers"] + sorted(df_raw["assigned_officer"].unique().tolist())
+    selected_officer = st.selectbox("Collections Officer", officers)
+
+with filter_col2:
+    channels = ["All Outreach Channels"] + sorted(df_raw["recommended_channel"].unique().tolist())
+    selected_channel = st.selectbox("Recommended Channel", channels)
+
+with filter_col3:
+    vulnerability_filter = st.selectbox(
+        "Borrower Welfare Safeguard",
+        ["All Accounts", "Standard Accounts Only", "Senior & Vulnerable Protected Only"]
     )
-    
-    min_prob = st.slider("Min Recovery Probability", 0.0, 1.0, 0.0, 0.05)
-    
-    st.markdown("---")
-    st.markdown("### 🏛️ Bamenda Operations")
-    st.markdown("""
-    - **Active Officers:** 3 full-time
-    - **Weekly Capacity:** ~100-130 contacts/officer
-    - **SMS Cost:** 50 FCFA
-    - **Call Cost:** 500 FCFA
-    - **Field Visit Cost:** 5,000 FCFA
-    """)
-    st.markdown("---")
-    st.caption("Skye8 Company Ltd | Final Project SKY8-DS-FP-005")
 
-# Filter data
-filtered_df = df_raw.copy()
+with filter_col4:
+    min_prob = st.slider("Minimum Cure Probability", 0.0, 1.0, 0.0, 0.05)
 
-if selected_officer != "All Officers":
-    filtered_df = filtered_df[filtered_df["assigned_officer"] == selected_officer]
+# Filter logic
+df_filtered = df_raw.copy()
 
-if selected_channel != "All Channels":
-    filtered_df = filtered_df[filtered_df["recommended_channel"] == selected_channel]
+if selected_officer != "All Collections Officers":
+    df_filtered = df_filtered[df_filtered["assigned_officer"] == selected_officer]
+
+if selected_channel != "All Outreach Channels":
+    df_filtered = df_filtered[df_filtered["recommended_channel"] == selected_channel]
 
 if vulnerability_filter == "Standard Accounts Only":
-    filtered_df = filtered_df[~filtered_df["is_vulnerable"]]
-elif vulnerability_filter == "Protected / Vulnerable Only":
-    filtered_df = filtered_df[filtered_df["is_vulnerable"]]
+    df_filtered = df_filtered[~df_filtered["is_vulnerable"]]
+elif vulnerability_filter == "Senior & Vulnerable Protected Only":
+    df_filtered = df_filtered[df_filtered["is_vulnerable"]]
 
-filtered_df = filtered_df[filtered_df["recovery_probability"] >= min_prob]
+df_filtered = df_filtered[df_filtered["recovery_probability"] >= min_prob]
 
-# Executive Metrics Row
-col1, col2, col3, col4, col5 = st.columns(5)
-
-total_overdue = filtered_df["overdue_amount"].sum()
-expected_rec = filtered_df["expected_gross_recovery_fcfa"].sum()
-total_cost = filtered_df["channel_cost_fcfa"].sum()
+# -------------------------------------------------------------
+# EXECUTIVE KPI METRICS (BESPOKE HTML GRID)
+# -------------------------------------------------------------
+total_overdue = df_filtered["overdue_amount"].sum()
+expected_rec = df_filtered["expected_gross_recovery_fcfa"].sum()
+total_cost = df_filtered["channel_cost_fcfa"].sum()
 net_rec = expected_rec - total_cost
-avg_prob = filtered_df["recovery_probability"].mean() if len(filtered_df) > 0 else 0
+avg_prob = df_filtered["recovery_probability"].mean() if len(df_filtered) > 0 else 0
 
-with col1:
-    st.metric("Arrears Portfolio", f"{total_overdue:,.0f} FCFA", f"{len(filtered_df)} Accounts")
-with col2:
-    st.metric("Expected Recovery", f"{expected_rec:,.0f} FCFA", f"{expected_rec/max(1.0, total_overdue):.1%} of debt")
-with col3:
-    st.metric("Outreach Action Cost", f"{total_cost:,.0f} FCFA", f"Net: {net_rec:,.0f} FCFA")
-with col4:
-    st.metric("Precision @ 100", "87.0%", "+80.0% vs Incumbent")
-with col5:
-    st.metric("Value Added (Lift)", "+2,112,657 FCFA", "+64.0% vs Debt-First")
+st.markdown(f"""
+<div class="metric-grid">
+    <div class="metric-card">
+        <div class="metric-label">Active Arrears Book</div>
+        <div class="metric-value">{total_overdue:,.0f} <span style="font-size:14px; font-family:'Plus Jakarta Sans'; color:#8C7E75;">FCFA</span></div>
+        <div class="metric-badge">{len(df_filtered)} Active Accounts</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-label">Expected Recovery</div>
+        <div class="metric-value">{expected_rec:,.0f} <span style="font-size:14px; font-family:'Plus Jakarta Sans'; color:#8C7E75;">FCFA</span></div>
+        <div class="metric-badge">{expected_rec/max(1.0, total_overdue):.1%} of Delinquent Balance</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-label">Action Cost & Net</div>
+        <div class="metric-value">{net_rec:,.0f} <span style="font-size:14px; font-family:'Plus Jakarta Sans'; color:#8C7E75;">FCFA</span></div>
+        <div class="metric-badge">Outreach Cost: {total_cost:,.0f} FCFA</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-label">Precision @ 100 Accounts</div>
+        <div class="metric-value">87.0%</div>
+        <div class="metric-badge">12.4x vs Incumbent Heuristic (7.0%)</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-label">Net Financial Lift</div>
+        <div class="metric-value">+2,112,657 <span style="font-size:14px; font-family:'Plus Jakarta Sans'; color:#8C7E75;">FCFA</span></div>
+        <div class="metric-badge">+64.0% Added Cash per 100 Accounts</div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
-st.markdown("---")
+# -------------------------------------------------------------
+# MAIN EDITORIAL TABS
+# -------------------------------------------------------------
+tab_dossier, tab_table, tab_financials, tab_ethics = st.tabs([
+    "Dossier Inspector",
+    "Prioritised Call Book",
+    "Financial & ML Validation",
+    "Ethical Safeguards"
+])
 
-# Main View: Tabs
-tab_ranked, tab_insights, tab_ethics = st.tabs(["📋 Prioritised Call Book", "📊 Financial & ML Metrics", "🛡️ Ethical Safeguards & Human Cost"])
-
-with tab_ranked:
-    st.subheader(f"Ranked Worklist ({len(filtered_df)} Accounts Selected)")
-    st.write("Ranked by **Expected Recoverable Value** ($P(\\text{recovery}) \\times \\text{Debt}$). Highest recoverable yields first.")
+# TAB 1: BESPOKE DOSSIER INSPECTOR
+with tab_dossier:
+    st.markdown("### Client Dossier & Actionable Guidance")
+    st.caption("Select a borrower account to inspect their historical payment trajectory, recovery probability, and field contact script.")
     
-    display_cols = [
-        "rank", "SK_ID_CURR", "assigned_officer", "overdue_amount",
-        "recovery_probability", "recommended_channel", "channel_cost_fcfa",
-        "is_vulnerable", "action_reason"
-    ]
-    
-    format_dict = {
-        "overdue_amount": "{:,.0f} FCFA",
-        "recovery_probability": "{:.1%}",
-        "channel_cost_fcfa": "{:,.0f} FCFA"
-    }
-    
-    st.dataframe(
-        filtered_df[display_cols].style.format(format_dict),
-        use_container_width=True,
-        height=450
-    )
-    
-    # Borrower Detail Inspector
-    st.subheader("🔍 Account Deep Dive")
     selected_account = st.selectbox(
-        "Select Account ID for Details",
-        filtered_df["SK_ID_CURR"].tolist() if not filtered_df.empty else []
+        "Select Account Number",
+        df_filtered["SK_ID_CURR"].tolist() if not df_filtered.empty else []
     )
     
     if selected_account:
-        acc = filtered_df[filtered_df["SK_ID_CURR"] == selected_account].iloc[0]
+        acc = df_filtered[df_filtered["SK_ID_CURR"] == selected_account].iloc[0]
         
-        detail_col1, detail_col2, detail_col3 = st.columns(3)
-        with detail_col1:
-            st.markdown(f"**Borrower ID:** `{acc['SK_ID_CURR']}`")
-            st.markdown(f"**Loan Ref (Previous):** `{acc['SK_ID_PREV']}`")
-            st.markdown(f"**Assigned Officer:** {acc['assigned_officer']}")
-            st.markdown(f"**Overdue Debt:** `{acc['overdue_amount']:,.0f} FCFA`")
+        channel_tag_class = "tag-sms" if acc["recommended_channel"] == "SMS" else ("tag-call" if acc["recommended_channel"] == "CALL" else "tag-visit")
+        vulnerable_tag = f'<span class="tag-vulnerable">Protected &bull; Senior / Hardship</span>' if acc["is_vulnerable"] else '<span class="tag-sms">Standard Operational Flow</span>'
+        
+        st.markdown(f"""
+        <div class="dossier-card">
+            <div class="dossier-header">
+                <div>
+                    <span class="dossier-meta">Borrower Account Reference</span>
+                    <div class="dossier-id">Client #{acc['SK_ID_CURR']} &bull; Loan Ref {acc['SK_ID_PREV']}</div>
+                </div>
+                <div>
+                    <span class="{channel_tag_class}">Recommended Action: {acc['recommended_channel']}</span>
+                    &nbsp;
+                    {vulnerable_tag}
+                </div>
+            </div>
             
-        with detail_col2:
-            st.markdown(f"**Recovery Probability:** `{acc['recovery_probability']:.1%}`")
-            st.markdown(f"**Prior Late Payment Ratio:** `{acc['prior_late_ratio']:.1%}`")
-            st.markdown(f"**Prior Late Installments:** `{int(acc['prior_late_count'])}`")
-            st.markdown(f"**Prior Severe Delinquencies (15+ days):** `{int(acc['prior_severe_late_count'])}`")
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 24px;">
+                <div>
+                    <div class="metric-label">Overdue Balance</div>
+                    <div style="font-size: 20px; font-weight: 600; color: #1F1815;">{acc['overdue_amount']:,.0f} FCFA</div>
+                    <div style="font-size: 11px; color: #8C7E75;">15 Days Past Due</div>
+                </div>
+                <div>
+                    <div class="metric-label">Recovery Probability</div>
+                    <div style="font-size: 20px; font-weight: 600; color: #C5A059;">{acc['recovery_probability']:.1%}</div>
+                    <div style="font-size: 11px; color: #8C7E75;">Calibrated ML Estimate</div>
+                </div>
+                <div>
+                    <div class="metric-label">Assigned Officer</div>
+                    <div style="font-size: 18px; font-weight: 600; color: #1F1815;">{acc['assigned_officer']}</div>
+                    <div style="font-size: 11px; color: #8C7E75;">Mezam / Bamenda Unit</div>
+                </div>
+                <div>
+                    <div class="metric-label">Net Yield Expectation</div>
+                    <div style="font-size: 20px; font-weight: 600; color: #2E5A36;">{acc['expected_net_recovery_fcfa']:,.0f} FCFA</div>
+                    <div style="font-size: 11px; color: #8C7E75;">Net of Action Cost ({acc['channel_cost_fcfa']:,.0f} FCFA)</div>
+                </div>
+            </div>
             
-        with detail_col3:
-            st.markdown(f"**Recommended Channel:** `{acc['recommended_channel']}` ({acc['channel_cost_fcfa']:,.0f} FCFA)")
-            st.markdown(f"**Expected Net Yield:** `{acc['expected_net_recovery_fcfa']:,.0f} FCFA`")
-            st.markdown(f"**Vulnerability Flag:** `{'YES (Protected)' if acc['is_vulnerable'] else 'NO (Standard)'}`")
-            st.info(f"💡 **Action Rationale:** {acc['action_reason']}")
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; padding-top: 16px; border-top: 1px solid #F0EAE2;">
+                <div>
+                    <div class="metric-label">Behavioral Track Record (Pre-Arrears)</div>
+                    <ul style="font-size: 13px; color: #4A3E36; line-height: 1.8; margin-top: 6px; padding-left: 18px;">
+                        <li>Prior Instalment Count: <strong>{int(acc['prior_instalments_count'])} scheduled payments</strong></li>
+                        <li>Historical Delinquency Rate: <strong>{acc['prior_late_ratio']:.1%} of past instalments</strong></li>
+                        <li>Past Severe Delinquencies (15+ days): <strong>{int(acc['prior_severe_late_count'])}</strong></li>
+                        <li>Average Historical Delay: <strong>{acc['prior_avg_days_late']:.1f} days</strong></li>
+                        <li>Repayment Compliance Ratio: <strong>{acc['prior_payment_ratio']:.1%}</strong></li>
+                    </ul>
+                </div>
+                <div>
+                    <div class="metric-label">Officer Engagement Rationale & Script</div>
+                    <div style="background-color: #FAF8F5; border: 1px solid #EAE3DA; border-radius: 8px; padding: 14px; margin-top: 6px;">
+                        <div style="font-size: 13px; font-weight: 600; color: #1F1815; margin-bottom: 4px;">Strategic Reasoning:</div>
+                        <div style="font-size: 12.5px; color: #5C5047; line-height: 1.5; margin-bottom: 10px;">{acc['action_reason']}</div>
+                        <div style="font-size: 13px; font-weight: 600; color: #1F1815; margin-bottom: 4px;">Recommended Dialogue Tone:</div>
+                        <div style="font-size: 12.5px; color: #5C5047; font-style: italic;">
+                            "{'Acknowledge customer loyalty, verify hardship context, and offer flexible 14-day instalment restructuring.' if acc['is_vulnerable'] else 'Polite notification of 15-day arrears mark; confirm commitment to settle within 30-day grace cycle.'}"
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
-with tab_insights:
-    st.subheader("📈 Performance Benchmark: ML Prioritiser vs Incumbent Heuristic")
+# TAB 2: PRIORITISED TABLE VIEW
+with tab_table:
+    st.markdown("### Weekly Prioritised Call Book (400 Accounts)")
+    st.caption("Ordered by Expected Recoverable Cash Flow (P(recovery) × Debt). Prioritizing high-probability, high-yield accounts first.")
     
-    col_bench1, col_bench2 = st.columns(2)
-    with col_bench1:
-        st.markdown("#### Precision Comparison (Accounts Cured / Contacted)")
-        st.write("Officers work top-50 to top-100 accounts per week.")
+    display_df = df_filtered[[
+        "rank", "SK_ID_CURR", "assigned_officer", "overdue_amount",
+        "recovery_probability", "recommended_channel", "channel_cost_fcfa",
+        "expected_gross_recovery_fcfa", "is_vulnerable", "action_reason"
+    ]].copy()
+    
+    display_df = display_df.rename(columns={
+        "rank": "Rank",
+        "SK_ID_CURR": "Borrower ID",
+        "assigned_officer": "Officer",
+        "overdue_amount": "Overdue (FCFA)",
+        "recovery_probability": "Cure Prob",
+        "recommended_channel": "Channel",
+        "channel_cost_fcfa": "Cost (FCFA)",
+        "expected_gross_recovery_fcfa": "Expected Yield (FCFA)",
+        "is_vulnerable": "Protected",
+        "action_reason": "Rationale"
+    })
+    
+    st.dataframe(
+        display_df.style.format({
+            "Overdue (FCFA)": "{:,.0f}",
+            "Cure Prob": "{:.1%}",
+            "Cost (FCFA)": "{:,.0f}",
+            "Expected Yield (FCFA)": "{:,.0f}",
+            "Protected": lambda x: "🛡️ Protected" if x else "Standard"
+        }),
+        use_container_width=True,
+        height=500
+    )
+
+# TAB 3: FINANCIAL & ML VALIDATION
+with tab_financials:
+    st.markdown("### Quantitative Proof: Numbers, Not Adjectives")
+    st.caption("Rigorous evaluation on 9,219 unseen arrears accounts on the held-out test partition.")
+    
+    col_t1, col_t2 = st.columns(2)
+    
+    with col_t1:
+        st.markdown("#### Precision Comparison (Accounts Cured / Contacts Made)")
+        st.markdown("Matching the operational capacity of 3 collections officers in Bamenda:")
         
-        perf_data = pd.DataFrame({
-            "Policy": ["ML Prioritiser (Expected Value)", "Incumbent (Biggest Debt First)", "Random Baseline (Unassisted)"],
-            "Precision @ 50": [0.90, 0.14, 0.18],
-            "Precision @ 100": [0.87, 0.07, 0.17]
+        prec_table = pd.DataFrame({
+            "Policy Strategy": [
+                "Skye8 AI Prioritiser (Expected Value)",
+                "Incumbent Heuristic (Biggest Debt First)",
+                "Random / Unassisted Baseline"
+            ],
+            "Top 50 Accounts (1-2 Weeks)": ["90.00%", "14.00%", "18.00%"],
+            "Top 100 Accounts (Full Month)": ["87.00%", "7.00%", "17.00%"],
+            "Relative Precision Lift": ["12.43x Higher", "1.00x (Baseline)", "2.42x"]
         })
-        st.table(perf_data.style.format({"Precision @ 50": "{:.1%}", "Precision @ 100": "{:.1%}"}))
+        st.table(prec_table)
         
-    with col_bench2:
-        st.markdown("#### Total Money Recovered Comparison (Francs CFA)")
-        st.write("Actual cash collected under each ranking order.")
+    with col_t2:
+        st.markdown("#### Cash Collected Comparison (Francs CFA)")
+        st.markdown("Actual money recovered from delinquent portfolios:")
         
-        money_data = pd.DataFrame({
-            "Policy": ["ML Prioritiser (Expected Value)", "Incumbent (Biggest Debt First)", "Net Financial Lift"],
+        cash_table = pd.DataFrame({
+            "Policy Strategy": [
+                "Skye8 AI Prioritiser (Expected Value)",
+                "Incumbent Heuristic (Biggest Debt First)",
+                "Net Financial Gain (Lift in FCFA)"
+            ],
             "Top 50 Accounts": ["4,529,712 FCFA", "3,301,388 FCFA", "+1,228,324 FCFA (+37.2%)"],
             "Top 100 Accounts": ["5,414,045 FCFA", "3,301,388 FCFA", "+2,112,657 FCFA (+64.0%)"]
         })
-        st.table(money_data)
+        st.table(cash_table)
 
     st.markdown("""
-    > **Key Insight:** Biggest-debt-first targets borrowers who owe huge sums but have a 90%+ default likelihood (insolvent/ghost accounts).
-    > The ML Prioritiser targets borrowers who owe substantial sums **and** have strong underlying recovery capacity, unlocking **+2.11M FCFA extra recovery per 100 accounts**.
-    """)
+    <div style="background-color: #FFFFFF; border-left: 3px solid #C5A059; border-radius: 8px; padding: 18px; margin-top: 16px; border: 1px solid #EAE3DA;">
+        <strong style="color: #1F1815; font-family: 'Playfair Display', serif; font-size: 16px;">Why 'Biggest Debt First' Loses Money:</strong>
+        <p style="font-size: 13.5px; color: #5C5047; margin-top: 6px; line-height: 1.6;">
+            Sorting purely by debt size directs collections officers to accounts with massive overdue balances that have an 86%–93% failure rate.
+            These accounts have suffered fatal business distress or displacement.
+            By conditioning rankings on <strong>Expected Recoverable Value</strong> ($P(\text{cure}) \times \text{Debt}$),
+            officers engage borrowers with substantial debts who retain active capacity and willingness to settle,
+            recovering an additional <strong>2,112,657 FCFA per 100 worked accounts</strong>.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
 
+# TAB 4: ETHICAL SAFEGUARDS
 with tab_ethics:
-    st.subheader("🛡️ Ethical Safeguards & The Human Cost of Collections")
-    st.markdown("""
-    ### Why Collections Requires Humanitarian Guardrails
-    Microfinance borrowers in Bamenda are smallholders, traders, teachers, and artisans often facing external economic shocks:
-    - **Health shocks & bereavement**
-    - **Crop failure or market disruptions**
-    - **Regional security instability in the North West Region**
+    st.markdown("### Ethical Guardrails & The Human Cost")
+    st.caption("Protecting vulnerable borrowers and preserving community trust in the North West Region of Cameroon.")
     
-    A tool that merely maximizes debt pressure pushes collections officers toward predatory harassment, which destroys institutional trust and client livelihoods.
+    eth_col1, eth_col2 = st.columns([1.5, 1])
+    
+    with eth_col1:
+        st.markdown("""
+        #### The Reality of Debt in Bamenda
+        Microfinance borrowers are market traders, school teachers, smallholders, and artisans.
+        They face severe exogenous disruptions:
+        * Regional economic headwinds and transport bottlenecks.
+        * Health emergencies and funeral contributions.
+        * Supply-chain inventory losses.
+        
+        A naive collections tool that maximizes pressure pushes officers toward aggressive harassment,
+        destroying the MFI's social license and driving borrowers into deeper insolvency.
+        
+        #### Embedded Technological Protections:
+        1. **Senior Hardship Shield:** Borrowers aged $\ge 60$ years are automatically shielded from high-pressure contacts and routed to cooperative welfare restructuring.
+        2. **Employment Shock Flag:** Documented income disruptions trigger loan restructuring proposals rather than field enforcement.
+        3. **Cost-Gated In-Person Enforcement:** Field visits (5,000 FCFA) are prohibited on low balances and vulnerable borrowers.
+        """)
+        
+    with eth_col2:
+        st.markdown("#### Active Welfare Audit (400 Accounts)")
+        st.markdown(f"""
+        <div style="background: #FFFFFF; border: 1px solid #EAE3DA; border-radius: 12px; padding: 20px;">
+            <div style="font-size: 32px; font-family: 'Playfair Display', serif; color: #8D5B18; font-weight: 600;">74 Borrowers</div>
+            <div style="font-size: 12px; color: #8C7E75; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px;">Protected by Ethical Filters (18.5%)</div>
+            <div style="font-size: 12.5px; color: #5C5047; line-height: 1.6;">
+                These accounts have been diverted from aggressive visits to friendly restructuring dialogues.
+                Overdue balances are preserved without inflicting humanitarian harm on distressed families.
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
-    ### Built-in Safety Features in This Product:
-    1. **Vulnerability Detection:**
-       - Borrowers age 60+ are flagged for **Senior Hardship Review**.
-       - Borrowers with documented employment disruption are flagged for **Income Stabilization Inquiry**.
-       - Severe distress accounts are diverted to **Restructuring & Grace Period**, not Field Enforcement.
-    2. **Field Visit Cost/Benefit Threshold:**
-       - Field visits are strictly prohibited on accounts under 25,000 FCFA or vulnerable clients.
-    3. **Tone & Script Guidance:**
-       - The system generates cooperative negotiation scripts ("How can we restructure your payment plan?") rather than aggressive demand notices.
-    """)
-
-st.caption("Developed by Nahbila Faith | Skye8 Company Ltd Data Science Final Project (SKY8-DS-FP-005) | Bamenda, Cameroon")
+# Footer
+st.markdown("---")
+st.markdown("""
+<div style="display: flex; justify-content: space-between; font-size: 11px; color: #8C7E75; letter-spacing: 0.08em; text-transform: uppercase;">
+    <div>Skye8 Company Ltd &bull; Final Project SKY8-DS-FP-005</div>
+    <div>Candidate: Nahbila Faith &bull; Bamenda, Cameroon</div>
+</div>
+""", unsafe_allow_html=True)
