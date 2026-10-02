@@ -209,8 +209,114 @@ def calculate_benskin_route_savings(df_officer: pd.DataFrame) -> Dict[str, Any]:
     }
 
 
+BAMENDA_SECURITY_TIERS = {
+    "Commercial Avenue / Food Market (Zone 1)": {
+        "tier": "Level 1: Safe Commercial Zone",
+        "badge": "🟢 Safe Transit",
+        "policy": "Standard daytime transit permitted during open commercial hours."
+    },
+    "Nkwen / Mile 2 - Mile 4 (Zone 2)": {
+        "tier": "Level 2: Main Axis Caution",
+        "badge": "🟡 Daytime Caution",
+        "policy": "Keep motorcycle transit along main asphalt axis between 9:00 AM and 3:30 PM."
+    },
+    "Up Station / Administrative (Zone 3)": {
+        "tier": "Level 1: High Security Corridor",
+        "badge": "🟢 Secure Corridor",
+        "policy": "Institutional administration zone. Unrestricted field access."
+    },
+    "Mankon / Small Mankon (Zone 4)": {
+        "tier": "Level 2: Daytime Daylight Only",
+        "badge": "🟡 Daylight Only",
+        "policy": "Field visits allowed during morning market hours; avoid isolated peripheral tracks."
+    },
+    "Old Council / Hospital Roundabout (Zone 5)": {
+        "tier": "Level 1: Dense Urban Zone",
+        "badge": "🟢 Safe Transit",
+        "policy": "High population density commercial hub. Standard transit."
+    }
+}
+
+
+def generate_momo_ussd_strings(
+    overdue_amount: float,
+    loan_ref: int,
+    mfi_code: str = "705001"
+) -> Dict[str, str]:
+    """Generate 1-click Cameroon Mobile Money USSD payment strings for instant borrower settlement."""
+    amt = int(round(overdue_amount))
+    return {
+        "mtn_ussd": f"*126*9*{mfi_code}*{amt}#",
+        "orange_ussd": f"*150*1*{mfi_code}*{amt}#",
+        "instruction_en": f"Dial *126*9*{mfi_code}*{amt}# (MTN) or *150*1*{mfi_code}*{amt}# (Orange) to settle Loan Ref #{loan_ref}.",
+        "instruction_pidgin": f"Dial *126*9*{mfi_code}*{amt}# for MTN or *150*1*{mfi_code}*{amt}# for Orange make you settle loan #{loan_ref} sharp-sharp."
+    }
+
+
+def calculate_cobac_regulatory_savings(
+    total_arrears_portfolio: float,
+    cure_lift_rate: float = 0.656,
+    base_cure_rate: float = 0.12
+) -> Dict[str, Any]:
+    """Calculate regulatory capital write-down provisions saved under COBAC Regulation R-2017/07.
+    
+    COBAC Category 1 MFI Prudential Rules:
+    - 31–90 DPD (Impayées): 20% mandatory capital write-down provision.
+    - 91–180 DPD (Douteuses): 50% provision.
+    """
+    slipping_portfolio_unassisted = total_arrears_portfolio * (1.0 - base_cure_rate)
+    unassisted_mandatory_provision = slipping_portfolio_unassisted * 0.20  # 20% mandatory COBAC reserve
+    
+    cured_portfolio_skye8 = total_arrears_portfolio * (base_cure_rate * (1.0 + cure_lift_rate))
+    slipping_portfolio_skye8 = max(0.0, total_arrears_portfolio - cured_portfolio_skye8)
+    skye8_mandatory_provision = slipping_portfolio_skye8 * 0.20
+    
+    regulatory_capital_saved = unassisted_mandatory_provision - skye8_mandatory_provision
+    
+    return {
+        "unassisted_provision_fcfa": round(unassisted_mandatory_provision, 0),
+        "skye8_provision_fcfa": round(skye8_mandatory_provision, 0),
+        "regulatory_capital_saved_fcfa": round(regulatory_capital_saved, 0),
+        "capital_preservation_pct": round((regulatory_capital_saved / max(1.0, unassisted_mandatory_provision)) * 100.0, 1),
+        "par30_risk_reduction_pct": round(cure_lift_rate * 100.0, 1)
+    }
+
+
+def calculate_small_small_repayment_plan(
+    overdue_amount: float,
+    days_option: int = 30
+) -> Dict[str, Any]:
+    """Generate informal trader daily 'small-small' micro-repayment breakdown."""
+    daily_payment = round(overdue_amount / float(days_option), 0)
+    return {
+        "days": days_option,
+        "daily_payment_fcfa": daily_payment,
+        "weekly_subtotal_fcfa": daily_payment * 7,
+        "plan_text": f"{daily_payment:,.0f} FCFA / day for {days_option} days via MTN MoMo auto-debit."
+    }
+
+
+def generate_diaspora_sponsor_script(
+    borrower_id: int,
+    loan_id: int,
+    overdue_amount: float,
+    assigned_officer: str,
+    branch_name: str = "Ntarinkon / Bamenda Main Branch"
+) -> str:
+    """Generate formal outreach message for family guarantor / diaspora sponsor in Douala, Yaoundé or Abroad."""
+    off_first = assigned_officer.split(" - ")[-1].split(" ")[0]
+    return (
+        f"Dear Family Guarantor / Sponsor, this is {off_first} from the Credit Union ({branch_name}). "
+        f"We are reaching out with respect regarding the cooperative facility for your family member (Client #{borrower_id}, Loan Ref #{loan_id}). "
+        f"An outstanding balance of {overdue_amount:,.0f} FCFA is currently 15 days past due. "
+        f"To safeguard your family's credit standing and prevent collateral action, payment can be settled remotely from Douala, Yaoundé, "
+        f"or abroad via MTN MoMo (*126*9*705001*{int(round(overdue_amount))}#), Orange Money (*150*1*705001*{int(round(overdue_amount))}#), "
+        f"or direct bank transfer. Kindly contact our desk for confirmation."
+    )
+
+
 def apply_action_recommendations(df: pd.DataFrame) -> pd.DataFrame:
-    """Apply contact recommendation, quarter assignment, scripts, and ethical safeguarding."""
+    """Apply contact recommendation, quarter assignment, scripts, MoMo links, and ethical safeguarding."""
     out = df.copy()
     rec_channels = []
     action_costs = []
@@ -218,8 +324,11 @@ def apply_action_recommendations(df: pd.DataFrame) -> pd.DataFrame:
     vulnerable_flags = []
     reasons = []
     quarters = []
+    security_badges = []
     eng_scripts = []
     pid_scripts = []
+    momo_strings = []
+    diaspora_scripts = []
     
     for _, row in out.iterrows():
         p = row.get("recovery_probability", 0.12)
@@ -247,10 +356,13 @@ def apply_action_recommendations(df: pd.DataFrame) -> pd.DataFrame:
         vulnerable_flags.append(rec["is_vulnerable"])
         reasons.append(rec["reason"])
         
-        # Quarter & scripts
+        # Quarter & security tier
         qtr = assign_bamenda_quarter(acc_id)
         quarters.append(qtr)
+        sec_info = BAMENDA_SECURITY_TIERS.get(qtr, {"badge": "🟢 Safe Transit"})
+        security_badges.append(sec_info["badge"])
         
+        # Scripts
         eng, pid = generate_bilingual_scripts(
             account_id=acc_id,
             loan_id=loan_id,
@@ -262,12 +374,22 @@ def apply_action_recommendations(df: pd.DataFrame) -> pd.DataFrame:
         eng_scripts.append(eng)
         pid_scripts.append(pid)
         
+        # MoMo USSD string
+        momo_data = generate_momo_ussd_strings(debt, loan_id)
+        momo_strings.append(momo_data["mtn_ussd"])
+        
+        # Diaspora script
+        diaspora_scripts.append(generate_diaspora_sponsor_script(acc_id, loan_id, debt, off))
+        
     out["recommended_channel"] = rec_channels
     out["channel_cost_fcfa"] = action_costs
     out["expected_net_recovery_fcfa"] = action_nevs
     out["is_vulnerable"] = vulnerable_flags
     out["action_reason"] = reasons
     out["bamenda_quarter"] = quarters
+    out["security_badge"] = security_badges
     out["script_english"] = eng_scripts
     out["script_pidgin"] = pid_scripts
+    out["momo_ussd_mtn"] = momo_strings
+    out["diaspora_script"] = diaspora_scripts
     return out

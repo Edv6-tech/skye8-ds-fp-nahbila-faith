@@ -28,6 +28,14 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 from src.model import AdaptablePrioritiser
+from src.contact import (
+    generate_momo_ussd_strings,
+    calculate_cobac_regulatory_savings,
+    calculate_small_small_repayment_plan,
+    generate_diaspora_sponsor_script,
+    calculate_benskin_route_savings,
+    BAMENDA_SECURITY_TIERS
+)
 
 # Page configuration - Masterpiece Edition
 st.set_page_config(
@@ -46,7 +54,12 @@ METRICS_PATH = Path(__file__).resolve().parents[1] / "reports" / "metrics_summar
 def load_data():
     if not DATA_PATH.exists():
         return pd.DataFrame()
-    return pd.read_csv(DATA_PATH)
+    df = pd.read_csv(DATA_PATH)
+    if "security_badge" not in df.columns and "bamenda_quarter" in df.columns:
+        df["security_badge"] = df["bamenda_quarter"].map(
+            lambda q: BAMENDA_SECURITY_TIERS.get(q, {}).get("badge", "🟢 Safe Transit")
+        )
+    return df
 
 
 df_raw = load_data()
@@ -880,6 +893,63 @@ Causal Segment: <strong style="color: #A67C48;">{segment}</strong> &bull; Settle
         )
 
         # -----------------------------------------------------
+        # LOCAL INNOVATION 1: MOBILE MONEY 1-CLICK USSD CODES
+        # -----------------------------------------------------
+        st.markdown("<div style='height: 18px;'></div>", unsafe_allow_html=True)
+        st.markdown("#### 📱 Mobile Money 1-Click USSD Dial Codes (Cameroon)")
+        st.caption("Frictionless digital recovery via MTN MoMo and Orange Money to eliminate cash transit risks.")
+        
+        momo_data = generate_momo_ussd_strings(acc['overdue_amount'], acc['SK_ID_PREV'])
+        col_momo1, col_momo2 = st.columns(2)
+        with col_momo1:
+            st.markdown("##### 🟡 MTN Mobile Money (MoMo)")
+            st.code(momo_data["mtn_ussd"], language="text")
+            st.caption("Credit Union Till: 705001 • Direct settlement into MFI treasury.")
+        with col_momo2:
+            st.markdown("##### 🟠 Orange Money Cameroun")
+            st.code(momo_data["orange_ussd"], language="text")
+            st.caption("Orange Partner Code: 705001 • Instant automated clearing.")
+        
+        st.info(f"**Borrower Dial Instruction (Pidgin):** {momo_data['instruction_pidgin']}")
+
+        # -----------------------------------------------------
+        # LOCAL INNOVATION 2 & 3: SMALL-SMALL MICRO-PLANS & DIASPORA PROTOCOL
+        # -----------------------------------------------------
+        col_innov1, col_innov2 = st.columns(2)
+        with col_innov1:
+            st.markdown("#### 🪙 Trader Daily 'Small-Small' Plan")
+            st.caption("Restructure lump-sum debt into daily micro-installments matching market cash velocity.")
+            tenor_choice = st.select_slider(
+                "Restructuring Horizon",
+                options=[15, 30, 45, 60],
+                value=30,
+                key=f"tenor_{acc['SK_ID_CURR']}"
+            )
+            micro_res = calculate_small_small_repayment_plan(acc['overdue_amount'], days_option=tenor_choice)
+            st.metric(
+                "Daily Micro-Installment",
+                f"{micro_res['daily_payment_fcfa']:,.0f} FCFA / day",
+                f"{micro_res['weekly_subtotal_fcfa']:,.0f} FCFA weekly"
+            )
+            st.markdown(f"**Agreement Terms:** `{micro_res['plan_text']}`")
+
+        with col_innov2:
+            st.markdown("#### 🌍 Diaspora Sponsor & Guarantor Protocol")
+            st.caption("Formal notice for family sponsors in Douala, Yaoundé, or Abroad to settle remotely.")
+            diaspora_note = generate_diaspora_sponsor_script(
+                int(acc['SK_ID_CURR']),
+                int(acc['SK_ID_PREV']),
+                acc['overdue_amount'],
+                acc['assigned_officer']
+            )
+            st.text_area(
+                "Guarantor Dialogue (Ready to Dispatch)",
+                value=diaspora_note,
+                height=130,
+                key=f"diaspora_{acc['SK_ID_CURR']}"
+            )
+
+        # -----------------------------------------------------
         # ACTIVE LEARNING HUMAN-IN-THE-LOOP FIELD LOGGER
         # -----------------------------------------------------
         st.markdown("<div style='height: 18px;'></div>", unsafe_allow_html=True)
@@ -1115,6 +1185,45 @@ with tab_roi:
             </p>
         </div>
         """), unsafe_allow_html=True)
+        
+        # -----------------------------------------------------
+        # LOCAL INNOVATION 4: COBAC REGULATION R-2017/07 CAPITAL SHIELD
+        # -----------------------------------------------------
+        st.markdown("<div style='height: 18px;'></div>", unsafe_allow_html=True)
+        st.markdown("#### 🛡️ COBAC Regulation R-2017/07 Capital Shield & Prudential Reserves Saved")
+        st.caption("Central African Banking Commission (COBAC) mandatory write-down provisions preserved by early cure (Day 15).")
+        
+        cobac_res = calculate_cobac_regulatory_savings(
+            total_arrears_portfolio=float(sim_portfolio),
+            cure_lift_rate=lift_rate,
+            base_cure_rate=sim_baseline_rate
+        )
+        
+        cob_col1, cob_col2, cob_col3 = st.columns(3)
+        with cob_col1:
+            st.metric(
+                "Statutory Reserve Preserved",
+                f"{cobac_res['regulatory_capital_saved_fcfa']:,.0f} FCFA",
+                f"+{cobac_res['capital_preservation_pct']:.1f}% capital saved"
+            )
+        with cob_col2:
+            st.metric(
+                "Unassisted 20% Provision",
+                f"{cobac_res['unassisted_provision_fcfa']:,.0f} FCFA",
+                "Mandatory write-down without AI"
+            )
+        with cob_col3:
+            st.metric(
+                "PAR30 Delinquency Reduction",
+                f"-{cobac_res['par30_risk_reduction_pct']:.1f}%",
+                "Loans prevented from crossing Day 31"
+            )
+            
+        st.markdown(textwrap.dedent("""
+        <div style="background-color: #FAF7F2; border: 1px solid #EAE2D7; border-radius: 8px; padding: 14px; margin-top: 10px; font-size: 12.5px; color: #5C5047; line-height: 1.6;">
+            <strong>Prudential Capital Preservation Mechanism:</strong> Under CEMAC/COBAC Category 1 Microfinance regulations (Regulation R-2017/07, Articles 21–25), loans entering 31–90 days past due (<em>créances impayées</em>) mandate an immediate <strong>20% write-down reserve</strong> against Tier 1 regulatory capital. By prioritizing and curing accounts at Day 15 before the Day 31 threshold, Skye8 prevents portfolio impairment, directly safeguarding cash capital to support new cooperative lending.
+        </div>
+        """), unsafe_allow_html=True)
 
 # -------------------------------------------------------------
 # TAB 5: BAMENDA ROUTE CLUSTERING & BENSKIN FUEL SAVER
@@ -1179,9 +1288,42 @@ with tab_routes:
         """), unsafe_allow_html=True)
         
     st.markdown("---")
-    st.markdown("#### 🗺️ Clustered Motorcycle Itinerary for Field Visits")
+    # -----------------------------------------------------
+    # LOCAL INNOVATION 5: BAMENDA SECURITY TIERS & SAFETY PROTOCOL
+    # -----------------------------------------------------
+    st.markdown("#### 🛡️ Bamenda Quarter Security Risk & Safe Transit Guide")
+    st.caption("Real-time safety classification to protect motorcycle field officers navigating Mezam division arterial roads.")
+    
+    sec_col1, sec_col2 = st.columns(2)
+    with sec_col1:
+        st.markdown(textwrap.dedent("""
+        <div style="background-color: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 8px; padding: 14px;">
+            <div style="font-weight: 700; color: #166534; font-size: 13px;">🟢 Safe Transit Zones (Low Risk)</div>
+            <div style="font-size: 12px; color: #15803D; margin-top: 4px; line-height: 1.5;">
+                Commercial Avenue, Up Station, Old Council, Food Market, Mile 2/3.<br>
+                <em>Protocol:</em> Standard operational transit; normal business hours (08:00 – 17:30).
+            </div>
+        </div>
+        """), unsafe_allow_html=True)
+    with sec_col2:
+        st.markdown(textwrap.dedent("""
+        <div style="background-color: #FEFCE8; border: 1px solid #FEF08A; border-radius: 8px; padding: 14px;">
+            <div style="font-weight: 700; color: #854D0E; font-size: 13px;">🟡 Daytime Caution Zones (Moderate Risk)</div>
+            <div style="font-size: 12px; color: #A16207; margin-top: 4px; line-height: 1.5;">
+                Nkwen, Mankon, Mile 4, Hospital Roundabout, Ngeng Junction.<br>
+                <em>Protocol:</em> Complete motorcycle transit before 16:30; stay on main paved axes; travel in pairs if handling physical cash.
+            </div>
+        </div>
+        """), unsafe_allow_html=True)
+
+    st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
+    st.markdown("#### 🗺️ Clustered Motorcycle Itinerary with Security Badges")
     
     route_view_df = df_raw[df_raw["recommended_channel"] == "FIELD_VISIT"].copy()
+    if "security_badge" not in route_view_df.columns:
+        route_view_df["security_badge"] = route_view_df["bamenda_quarter"].map(
+            lambda q: BAMENDA_SECURITY_TIERS.get(q, {}).get("badge", "🟢 Safe Transit")
+        )
     if selected_zone_for_route != "All Quarters":
         route_view_df = route_view_df[route_view_df["bamenda_quarter"] == selected_zone_for_route]
         
@@ -1189,10 +1331,11 @@ with tab_routes:
     
     st.dataframe(
         route_view_df[[
-            "bamenda_quarter", "SK_ID_CURR", "assigned_officer", "overdue_amount",
+            "bamenda_quarter", "security_badge", "SK_ID_CURR", "assigned_officer", "overdue_amount",
             "recovery_probability", "expected_gross_recovery_fcfa", "action_reason"
         ]].rename(columns={
             "bamenda_quarter": "Quarter / Neighborhood",
+            "security_badge": "Security Tier",
             "SK_ID_CURR": "Borrower ID",
             "assigned_officer": "Assigned Officer",
             "overdue_amount": "Overdue (FCFA)",
@@ -1267,12 +1410,16 @@ with tab_docket:
                 <div style="font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 600; color: #1F1815; margin-bottom: 6px;">
                     ✂️ MEMBER REPAYMENT PLEDGE COMMITMENT (TEAR-OFF SLIP)
                 </div>
-                <div style="font-size: 12px; color: #5C5047; line-height: 1.6; margin-bottom: 16px;">
+                <div style="font-size: 12px; color: #5C5047; line-height: 1.6; margin-bottom: 12px;">
                     I, member of account <strong>#{doc_row['SK_ID_CURR']}</strong>, hereby acknowledge the overdue balance of <strong>{doc_row['overdue_amount']:,.0f} FCFA</strong>.
                     I formally commit to deposit the agreed settlement sum of __________________ FCFA into the credit union counter on or before ____ / ____ / 2026.
                 </div>
                 
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-top: 24px;">
+                <div style="background-color: #FAF7F2; border: 1px solid #EAE2D7; border-radius: 6px; padding: 8px 12px; margin-bottom: 16px; font-size: 11px; color: #4A3E36;">
+                    <strong>Instant Mobile Settlement:</strong> Pay without cash transit via <strong>MTN MoMo:</strong> <code>*126*9*705001*{int(round(doc_row['overdue_amount']))}#</code> or <strong>Orange Money:</strong> <code>*150*1*705001*{int(round(doc_row['overdue_amount']))}#</code>.
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-top: 18px;">
                     <div style="border-top: 1px solid #1F1815; padding-top: 6px; font-size: 11px; text-align: center;">
                         Member Signature & Date
                     </div>

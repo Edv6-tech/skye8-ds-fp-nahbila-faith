@@ -173,3 +173,35 @@ def test_adaptable_prioritiser(dummy_data):
     
     ranked_vuln = engine.rank_portfolio(df_port, objective="Vulnerable & Community First")
     assert ranked_vuln["is_vulnerable"].iloc[0] == True
+
+
+def test_cobac_and_momo_features():
+    from src.contact import (
+        generate_momo_ussd_strings,
+        calculate_cobac_regulatory_savings,
+        calculate_small_small_repayment_plan,
+        generate_diaspora_sponsor_script
+    )
+    
+    # 1. MoMo USSD Generator
+    momo = generate_momo_ussd_strings(75000, 204551)
+    assert "*126*9*" in momo["mtn_ussd"]
+    assert "*150*1*" in momo["orange_ussd"]
+    assert "75000" in momo["mtn_ussd"]
+    
+    # 2. COBAC Regulatory Capital Savings
+    cobac = calculate_cobac_regulatory_savings(150000000.0)
+    assert cobac["regulatory_capital_saved_fcfa"] > 0
+    assert cobac["capital_preservation_pct"] > 5.0
+    assert cobac["par30_risk_reduction_pct"] > 60.0
+    
+    # 3. Small-Small Micro-repayment Plan
+    micro = calculate_small_small_repayment_plan(75000, days_option=30)
+    assert micro["daily_payment_fcfa"] == 2500
+    assert "2,500 FCFA / day" in micro["plan_text"]
+    
+    # 4. Diaspora Sponsor Protocol
+    diaspora = generate_diaspora_sponsor_script(103380, 204551, 75000, "Officer 1 - John N.")
+    assert "Family Guarantor" in diaspora
+    assert "75,000 FCFA" in diaspora
+    assert "*126*9*" in diaspora
