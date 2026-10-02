@@ -2,6 +2,7 @@
 
 A high-luxury, editorial UI/UX designed for Microfinance Institutions in Bamenda, Cameroon.
 Features:
+- Super elegant luxury sidebar with officer load distribution, channels, and system telemetry.
 - Editorial typography (Playfair Display & Plus Jakarta Sans).
 - Warm espresso, champagne gold, and ivory silk palette.
 - Bespoke KPI metric cards and micro-interactions.
@@ -13,12 +14,12 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 
-# Page configuration
+# Page configuration - Super elegant sidebar open by default
 st.set_page_config(
     page_title="Skye8 Prioritiser | Haute Edition",
     page_icon="⚜️",
     layout="wide",
-    initial_sidebar_state="collapsed"
+    initial_sidebar_state="expanded"
 )
 
 # File paths
@@ -35,7 +36,7 @@ def load_data():
 
 df_raw = load_data()
 
-# Inject High-Luxury Editorial CSS
+# Inject High-Luxury Editorial CSS including Super Elegant Dark Sidebar
 st.markdown("""
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -53,15 +54,152 @@ st.markdown("""
         background-color: #FAF8F5;
     }
 
-    /* Editorial Hero Section */
+    /* ========================================================
+       SUPER ELEGANT SIDEBAR (NOIR ESPRESSO & CHAMPAGNE GOLD)
+       ======================================================== */
+    section[data-testid="stSidebar"] {
+        background: linear-gradient(180deg, #16110F 0%, #1D1613 60%, #241B17 100%) !important;
+        border-right: 1px solid rgba(197, 160, 89, 0.22) !important;
+        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15) !important;
+    }
+
+    section[data-testid="stSidebar"] .stMarkdown,
+    section[data-testid="stSidebar"] p,
+    section[data-testid="stSidebar"] span {
+        color: #E8DDD4 !important;
+    }
+
+    section[data-testid="stSidebar"] label {
+        font-size: 10.5px !important;
+        letter-spacing: 0.16em !important;
+        text-transform: uppercase !important;
+        font-weight: 600 !important;
+        color: #C5A059 !important;
+    }
+
+    /* Style selectboxes and inputs inside sidebar */
+    section[data-testid="stSidebar"] div[data-baseweb="select"] {
+        background-color: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid rgba(197, 160, 89, 0.3) !important;
+        border-radius: 8px !important;
+        color: #FAF8F5 !important;
+    }
+
+    section[data-testid="stSidebar"] div[data-baseweb="select"] * {
+        color: #FAF8F5 !important;
+    }
+
+    .sidebar-brand-block {
+        padding: 8px 4px 20px 4px;
+        border-bottom: 1px solid rgba(197, 160, 89, 0.22);
+        margin-bottom: 24px;
+    }
+
+    .sidebar-crest {
+        font-size: 28px;
+        line-height: 1;
+        margin-bottom: 8px;
+    }
+
+    .sidebar-title {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: 20px;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        color: #FAF8F5;
+        margin: 0;
+    }
+
+    .sidebar-subtitle {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 9.5px;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: #C5A059;
+        margin-top: 5px;
+        font-weight: 500;
+    }
+
+    .sidebar-card {
+        background: rgba(255, 255, 255, 0.035);
+        border: 1px solid rgba(197, 160, 89, 0.2);
+        border-radius: 10px;
+        padding: 16px;
+        margin-bottom: 22px;
+    }
+
+    .sidebar-card-title {
+        font-size: 10px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: #C5A059;
+        font-weight: 600;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .sidebar-stat-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 12px;
+        padding: 6px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .sidebar-stat-row:last-child {
+        border-bottom: none;
+    }
+
+    .sidebar-stat-name {
+        color: #D6C8BE;
+        font-weight: 400;
+    }
+
+    .sidebar-stat-val {
+        color: #FAF8F5;
+        font-weight: 600;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    .sidebar-status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(197, 160, 89, 0.12);
+        border: 1px solid rgba(197, 160, 89, 0.35);
+        color: #E2CA96;
+        font-size: 10px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        font-weight: 600;
+        padding: 5px 10px;
+        border-radius: 20px;
+        margin-top: 8px;
+    }
+
+    .pulse-dot {
+        width: 6px;
+        height: 6px;
+        background-color: #C5A059;
+        border-radius: 50%;
+        display: inline-block;
+        box-shadow: 0 0 8px #C5A059;
+    }
+
+    /* ========================================================
+       EDITORIAL HERO SECTION
+       ======================================================== */
     .hero-container {
         background: linear-gradient(135deg, #1C1512 0%, #2A201B 60%, #382B24 100%);
         border-radius: 16px;
-        padding: 48px 48px 40px 48px;
-        margin-bottom: 32px;
+        padding: 44px 44px 38px 44px;
+        margin-bottom: 30px;
         color: #FAF8F5;
         position: relative;
-        box-shadow: 0 20px 40px rgba(28, 21, 18, 0.15);
+        box-shadow: 0 20px 40px rgba(28, 21, 18, 0.12);
         border: 1px solid rgba(197, 160, 89, 0.25);
     }
     
@@ -72,7 +210,7 @@ st.markdown("""
         letter-spacing: 0.22em;
         text-transform: uppercase;
         color: #C5A059;
-        margin-bottom: 14px;
+        margin-bottom: 12px;
         display: flex;
         align-items: center;
         gap: 8px;
@@ -88,12 +226,12 @@ st.markdown("""
 
     .hero-title {
         font-family: 'Playfair Display', Georgia, serif;
-        font-size: 42px;
+        font-size: 40px;
         line-height: 1.15;
         font-weight: 400;
         letter-spacing: -0.02em;
         color: #FAF8F5;
-        margin-bottom: 16px;
+        margin-bottom: 14px;
     }
 
     .hero-title em {
@@ -105,7 +243,7 @@ st.markdown("""
 
     .hero-desc {
         font-family: 'Plus Jakarta Sans', sans-serif;
-        font-size: 14.5px;
+        font-size: 14px;
         line-height: 1.6;
         color: #D3C7BF;
         max-width: 640px;
@@ -255,14 +393,6 @@ st.markdown("""
     }
 
     /* Refined Streamlit Native Overrides */
-    .stSelectbox label, .stSlider label, .stRadio label {
-        font-size: 11.5px !important;
-        letter-spacing: 0.08em !important;
-        text-transform: uppercase !important;
-        font-weight: 600 !important;
-        color: #5C5047 !important;
-    }
-
     div[data-baseweb="tab-list"] {
         border-bottom: 1px solid #E6DED5 !important;
         gap: 24px !important;
@@ -290,47 +420,90 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# -------------------------------------------------------------
-# HERO BANNER (EDITORIAL LUXURY DESIGN)
-# -------------------------------------------------------------
-st.markdown("""
-<div class="hero-container">
-    <div class="hero-eyebrow">Skye8 Intelligence &bull; Core ML &bull; Bamenda, Cameroon</div>
-    <div class="hero-title">The <em>precision</em> of recovery,<br>the <em>depth</em> of care.</div>
-    <div class="hero-desc">
-        A predictive decision engine ranking the arrears portfolio by expected recovery value,
-        optimizing contact channel economics, and safeguarding vulnerable borrowers across 400 credit union accounts.
-    </div>
-</div>
-""", unsafe_allow_html=True)
-
 if df_raw.empty:
     st.error("Weekly portfolio data not found. Please run `python run_pipeline.py` first.")
     st.stop()
 
-# -------------------------------------------------------------
-# FILTER CONTROLS BAR (MINIMALIST REFINED)
-# -------------------------------------------------------------
-filter_col1, filter_col2, filter_col3, filter_col4 = st.columns([1.2, 1.2, 1.4, 1.2])
-
-with filter_col1:
+# =============================================================
+# SUPER ELEGANT SIDEBAR (EXECUTIVE CONTROLS & TELEMETRY)
+# =============================================================
+with st.sidebar:
+    st.markdown("""
+    <div class="sidebar-brand-block">
+        <div class="sidebar-crest">⚜️</div>
+        <h2 class="sidebar-title">SKYE8 PRIORITISER</h2>
+        <div class="sidebar-subtitle">Haute Collections Intelligence &bull; Bamenda</div>
+        <div class="sidebar-status-pill">
+            <span class="pulse-dot"></span>
+            Model Active &bull; Zero Leakage
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("### 🎛️ Portfolio Controls")
+    
     officers = ["All Collections Officers"] + sorted(df_raw["assigned_officer"].unique().tolist())
-    selected_officer = st.selectbox("Collections Officer", officers)
+    selected_officer = st.selectbox("Assignee Filter", officers)
 
-with filter_col2:
     channels = ["All Outreach Channels"] + sorted(df_raw["recommended_channel"].unique().tolist())
-    selected_channel = st.selectbox("Recommended Channel", channels)
+    selected_channel = st.selectbox("Outreach Channel", channels)
 
-with filter_col3:
     vulnerability_filter = st.selectbox(
-        "Borrower Welfare Safeguard",
+        "Ethical Safeguard Filter",
         ["All Accounts", "Standard Accounts Only", "Senior & Vulnerable Protected Only"]
     )
 
-with filter_col4:
     min_prob = st.slider("Minimum Cure Probability", 0.0, 1.0, 0.0, 0.05)
 
-# Filter logic
+    st.markdown("---")
+    
+    # Live Officer Capacity Card
+    st.markdown("""
+    <div class="sidebar-card">
+        <div class="sidebar-card-title">👥 Officer Caseload Distribution</div>
+    """, unsafe_allow_html=True)
+    
+    officer_counts = df_raw["assigned_officer"].value_counts()
+    for off_name in sorted(officer_counts.index):
+        cnt = officer_counts[off_name]
+        short_name = off_name.split(" - ")[-1]
+        st.markdown(f"""
+        <div class="sidebar-stat-row">
+            <span class="sidebar-stat-name">{short_name}</span>
+            <span class="sidebar-stat-val">{cnt} accounts</span>
+        </div>
+        """, unsafe_allow_html=True)
+        
+    st.markdown("</div>", unsafe_allow_html=True)
+    
+    # Channel Cost Reference Card
+    st.markdown("""
+    <div class="sidebar-card">
+        <div class="sidebar-card-title">💰 Channel Unit Economics</div>
+        <div class="sidebar-stat-row">
+            <span class="sidebar-stat-name">SMS Prompt</span>
+            <span class="sidebar-stat-val">50 FCFA</span>
+        </div>
+        <div class="sidebar-stat-row">
+            <span class="sidebar-stat-name">Phone Call</span>
+            <span class="sidebar-stat-val">500 FCFA</span>
+        </div>
+        <div class="sidebar-stat-row">
+            <span class="sidebar-stat-name">Field Visit</span>
+            <span class="sidebar-stat-val">5,000 FCFA</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("""
+    <div style="font-size: 10px; color: #8C7E75; text-align: center; letter-spacing: 0.1em; text-transform: uppercase;">
+        Skye8 Final Project SKY8-DS-FP-005<br>Nahbila Faith &bull; October 2026
+    </div>
+    """, unsafe_allow_html=True)
+
+# -------------------------------------------------------------
+# FILTER DATA ENGINE
+# -------------------------------------------------------------
 df_filtered = df_raw.copy()
 
 if selected_officer != "All Collections Officers":
@@ -347,13 +520,26 @@ elif vulnerability_filter == "Senior & Vulnerable Protected Only":
 df_filtered = df_filtered[df_filtered["recovery_probability"] >= min_prob]
 
 # -------------------------------------------------------------
+# HERO BANNER (EDITORIAL LUXURY DESIGN)
+# -------------------------------------------------------------
+st.markdown("""
+<div class="hero-container">
+    <div class="hero-eyebrow">Skye8 Intelligence &bull; Core ML &bull; Bamenda, Cameroon</div>
+    <div class="hero-title">The <em>precision</em> of recovery,<br>the <em>depth</em> of care.</div>
+    <div class="hero-desc">
+        A predictive decision engine ranking the arrears portfolio by expected recovery value,
+        optimizing contact channel economics, and safeguarding vulnerable borrowers across 400 credit union accounts.
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+# -------------------------------------------------------------
 # EXECUTIVE KPI METRICS (BESPOKE HTML GRID)
 # -------------------------------------------------------------
 total_overdue = df_filtered["overdue_amount"].sum()
 expected_rec = df_filtered["expected_gross_recovery_fcfa"].sum()
 total_cost = df_filtered["channel_cost_fcfa"].sum()
 net_rec = expected_rec - total_cost
-avg_prob = df_filtered["recovery_probability"].mean() if len(df_filtered) > 0 else 0
 
 st.markdown(f"""
 <div class="metric-grid">
@@ -498,6 +684,7 @@ with tab_table:
         "action_reason": "Rationale"
     })
     
+    # Formatted dataframe without deprecated use_container_width warning
     st.dataframe(
         display_df.style.format({
             "Overdue (FCFA)": "{:,.0f}",
@@ -506,7 +693,6 @@ with tab_table:
             "Expected Yield (FCFA)": "{:,.0f}",
             "Protected": lambda x: "🛡️ Protected" if x else "Standard"
         }),
-        use_container_width=True,
         height=500
     )
 
