@@ -581,7 +581,7 @@ with tab_ethics:
         destroying the MFI's social license and driving borrowers into deeper insolvency.
         
         #### Embedded Technological Protections:
-        1. **Senior Hardship Shield:** Borrowers aged $\ge 60$ years are automatically shielded from high-pressure contacts and routed to cooperative welfare restructuring.
+        1. **Senior Hardship Shield:** Borrowers aged >= 60 years are automatically shielded from high-pressure contacts and routed to cooperative welfare restructuring.
         2. **Employment Shock Flag:** Documented income disruptions trigger loan restructuring proposals rather than field enforcement.
         3. **Cost-Gated In-Person Enforcement:** Field visits (5,000 FCFA) are prohibited on low balances and vulnerable borrowers.
         """)
