@@ -24,10 +24,10 @@ A standard branch holds ~400 delinquent loans ($\ge 15$ days overdue) worth roug
 
 ### The Value Delivered (In Francs CFA)
 Using the Skye8 Prioritiser:
-* **Precision at Top 100 Accounts:** Increases from **7.0% to 87.0%** (12.4x more recovered accounts).
-* **Cash Recovered (Top 100 Accounts):** Increases from **3,301,388 FCFA to 5,414,045 FCFA**.
-* **Net Value Added per Month:** **+2,112,657 FCFA** in cash collections per branch per month.
-* **Annual Recovered Gain:** Over **25,000,000 FCFA** in prevented write-offs per branch.
+* **Precision at Top 100 Accounts:** Increases from **7.0% to 88.0%** (12.57x more recovered accounts).
+* **Cash Recovered (Top 100 Accounts):** Increases from **3,301,388 FCFA to 5,465,544 FCFA**.
+* **Net Value Added per Month:** **+2,164,156 FCFA** in cash collections per branch per month (+65.6%).
+* **Annual Recovered Gain:** Over **25,900,000 FCFA** in prevented write-offs per branch.
 
 ---
 
@@ -36,8 +36,8 @@ Using the Skye8 Prioritiser:
 * **Licensing Model:** B2B Software-as-a-Service (SaaS), billed monthly per institution branch.
 * **Subscription Price:** **150,000 FCFA / month** per MFI branch (includes 3 officer accounts + 1 supervisor portal).
 * **ROI for Buyer:**
-  $$\text{Monthly Customer Net Gain} = 2,112,657\text{ FCFA} - 150,000\text{ FCFA} = \mathbf{+1,962,657\text{ FCFA/month}}$$
-  **Return on Investment (ROI): 14.1x** the subscription fee in direct recovered liquidity.
+  $$\text{Monthly Customer Net Gain} = 2,164,156\text{ FCFA} - 150,000\text{ FCFA} = \mathbf{+2,014,156\text{ FCFA/month}}$$
+  **Return on Investment (ROI): 14.4x** the subscription fee in direct recovered liquidity. Payback in **2.1 days**.
 
 ---
 

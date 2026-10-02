@@ -70,17 +70,17 @@ In collections operations, global accuracy is meaningless. Performance must be e
 | Metric                      | Top 50 Accounts (1-2 Weeks)    | Top 100 Accounts (Full Month)  |
 |                             | Incumbent     | ML Prioritiser | Incumbent     | ML Prioritiser |
 +-----------------------------+---------------+----------------+---------------+----------------+
-| Cure Precision (%)          | 14.00%        | 90.00%         | 7.00%         | 87.00%         |
-| Relative Precision Lift     | 1.00x         | 6.43x          | 1.00x         | 12.43x         |
-| Money Recovered (FCFA)      | 3,301,388     | 4,529,712      | 3,301,388     | 5,414,045      |
-| Net Financial Lift (FCFA)   | Baseline      | +1,228,324     | Baseline      | +2,112,657     |
-| Percentage Revenue Gain     | Baseline      | +37.20%        | Baseline      | +64.00%        |
+| Cure Precision (%)          | 14.00%        | 90.00%         | 7.00%         | 88.00%         |
+| Relative Precision Lift     | 1.00x         | 6.43x          | 1.00x         | 12.57x         |
+| Money Recovered (FCFA)      | 3,301,388     | 4,557,608      | 3,301,388     | 5,465,544      |
+| Net Financial Lift (FCFA)   | Baseline      | +1,256,220     | Baseline      | +2,164,156     |
+| Percentage Revenue Gain     | Baseline      | +38.05%        | Baseline      | +65.55%        |
 +-----------------------------------------------------------------------------------------------+
 ```
 
 * **Precision@50:** Jumps from **14.0% to 90.0%** (a 6.43x improvement in contact effectiveness).
-* **Precision@100:** Jumps from **7.0% to 87.0%** (a 12.43x improvement). 87 out of 100 contacts successfully cure, compared to only 7 under biggest-debt-first.
-* **Money Recovered:** Generates **5,414,045 FCFA** vs. **3,301,388 FCFA** at top 100, representing a net gain of **+2,112,657 FCFA (+64.0%)**.
+* **Precision@100:** Jumps from **7.0% to 88.0%** (a 12.57x improvement). 88 out of 100 contacts successfully cure, compared to only 7 under biggest-debt-first.
+* **Money Recovered:** Generates **5,465,544 FCFA** vs. **3,301,388 FCFA** at top 100, representing a net gain of **+2,164,156 FCFA (+65.6%)**.
 
 ---
 

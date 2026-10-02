@@ -111,14 +111,24 @@ def main():
     # -------------------------------------------------------------
     # 4. STAGE C - MULTI-TASK & SURVIVAL MODEL TRAINING
     # -------------------------------------------------------------
-    print("\n[4/6] Training calibrated classifier and time-to-cure survival regressor...")
+    print("\n[4/6] Training calibrated classifier, time-to-cure survival, and partial recovery regressors...")
     clf = train_prioritiser(X_train, y_train, calibrate=True)
     save_model(clf, "prioritiser_model.joblib")
     
     # Train survival regressor
     ttc_model = train_time_to_cure_regressor(X_train[y_train == 1], ttc_train[y_train == 1])
     save_model(ttc_model, "time_to_cure_regressor.joblib")
-    print("  [+] Calibrated Classifier & Survival Regressor saved to models/")
+
+    # Train partial recovery ratio regressor (synthesized realistic settlement ratio 0.4 to 1.0)
+    rng_rec = np.random.RandomState(42)
+    recovery_ratios_train = np.clip(
+        0.55 + 0.40 * (X_train.loc[y_train == 1, "prior_payment_ratio"] - 0.5) + rng_rec.normal(0, 0.08, size=(y_train == 1).sum()),
+        0.35, 1.00
+    )
+    from src.model import train_partial_recovery_regressor, predict_partial_recovery_ratio, compute_xai_waterfall
+    ratio_model = train_partial_recovery_regressor(X_train[y_train == 1], pd.Series(recovery_ratios_train))
+    save_model(ratio_model, "partial_recovery_regressor.joblib")
+    print("  [+] Calibrated Classifier, Survival Regressor & Partial Recovery Model saved to models/")
 
     # Evaluate on held-out test partition
     y_prob_test = predict_recovery_probability(clf, X_test)
@@ -144,7 +154,7 @@ def main():
     # -------------------------------------------------------------
     # 5. STAGE D & CAUSAL UPLIFT ENGINE
     # -------------------------------------------------------------
-    print("\n[5/6] Computing Causal Uplift (Treatment Effect) & Time-to-Cure...")
+    print("\n[5/6] Computing Causal Uplift (Treatment Effect) & Multi-Task Metrics...")
     book_candidates = events_test.copy().reset_index(drop=True)
     book_features = X_test.copy().reset_index(drop=True)
     
@@ -160,14 +170,20 @@ def main():
     # Time-to-cure survival estimation
     est_ttc = predict_time_to_cure(ttc_model, book_features)
     book_candidates["estimated_days_to_cure"] = est_ttc
+
+    # Partial recovery ratio estimation
+    est_ratio = predict_partial_recovery_ratio(ratio_model, book_features)
+    book_candidates["partial_recovery_ratio"] = est_ratio
     
     # Copy features for transparency
     for col in FEATURE_COLUMNS:
         book_candidates[col] = book_features[col]
         
-    # Expected gross recovery
+    # Expected gross recovery = P(recovery) * Partial_Recovery_Ratio * Overdue_Amount
     book_candidates["expected_gross_recovery_fcfa"] = (
-        book_candidates["recovery_probability"] * book_candidates["overdue_amount"]
+        book_candidates["recovery_probability"] * 
+        book_candidates["partial_recovery_ratio"] * 
+        book_candidates["overdue_amount"]
     )
     
     # Select weekly 400-account book
@@ -175,18 +191,33 @@ def main():
     book_400 = book_400.sort_values("expected_gross_recovery_fcfa", ascending=False).reset_index(drop=True)
     book_400["rank"] = np.arange(1, len(book_400) + 1)
     
-    # Apply cost-weighted recommendations & ethical filters
-    book_400 = apply_action_recommendations(book_400)
-    
-    # Assign equitably across the 3 collections officers
+    # Assign equitably across the 3 collections officers first
     officer_names = ["Officer 1 - John N.", "Officer 2 - Beatrice M.", "Officer 3 - Emmanuel K."]
     book_400["assigned_officer"] = [officer_names[i % 3] for i in range(len(book_400))]
+
+    # Apply cost-weighted recommendations, quarter clustering, bilingual scripts, & ethical filters
+    book_400 = apply_action_recommendations(book_400)
+
+    # Compute XAI Top Drivers for each borrower
+    xai_positive_json = []
+    xai_negative_json = []
+    for _, r in book_400.iterrows():
+        xai_res = compute_xai_waterfall(r)
+        pos_str = " | ".join([f"{d['factor']} ({d['impact']})" for d in xai_res["top_positive"]])
+        neg_str = " | ".join([f"{d['factor']} ({d['impact']})" for d in xai_res["top_negative"]])
+        xai_positive_json.append(pos_str)
+        xai_negative_json.append(neg_str)
+        
+    book_400["xai_top_positive"] = xai_positive_json
+    book_400["xai_top_negative"] = xai_negative_json
 
     out_book_path = PROCESSED_DIR / "weekly_400_accounts.csv"
     book_400.to_csv(out_book_path, index=False)
     print(f"\n[6/6] Saved enhanced 400-account book to {out_book_path}!")
     print(f"  [+] Behavioral Archetypes: {dict(book_400['behavioral_segment'].value_counts())}")
     print(f"  [+] Mean Time-to-Cure: {book_400['estimated_days_to_cure'].mean():.1f} days")
+    print(f"  [+] Mean Expected Settlement Ratio: {book_400['partial_recovery_ratio'].mean():.1%}")
+    print(f"  [+] Bamenda Quarters: {dict(book_400['bamenda_quarter'].value_counts())}")
     print("=" * 75)
 
 
