@@ -212,27 +212,27 @@ def calculate_benskin_route_savings(df_officer: pd.DataFrame) -> Dict[str, Any]:
 BAMENDA_SECURITY_TIERS = {
     "Commercial Avenue / Food Market (Zone 1)": {
         "tier": "Level 1: Safe Commercial Zone",
-        "badge": "🟢 Safe Transit",
+        "badge": "L1: Safe Transit",
         "policy": "Standard daytime transit permitted during open commercial hours."
     },
     "Nkwen / Mile 2 - Mile 4 (Zone 2)": {
         "tier": "Level 2: Main Axis Caution",
-        "badge": "🟡 Daytime Caution",
+        "badge": "L2: Daytime Caution",
         "policy": "Keep motorcycle transit along main asphalt axis between 9:00 AM and 3:30 PM."
     },
     "Up Station / Administrative (Zone 3)": {
         "tier": "Level 1: High Security Corridor",
-        "badge": "🟢 Secure Corridor",
+        "badge": "L1: Secure Corridor",
         "policy": "Institutional administration zone. Unrestricted field access."
     },
     "Mankon / Small Mankon (Zone 4)": {
         "tier": "Level 2: Daytime Daylight Only",
-        "badge": "🟡 Daylight Only",
+        "badge": "L2: Daylight Only",
         "policy": "Field visits allowed during morning market hours; avoid isolated peripheral tracks."
     },
     "Old Council / Hospital Roundabout (Zone 5)": {
         "tier": "Level 1: Dense Urban Zone",
-        "badge": "🟢 Safe Transit",
+        "badge": "L1: Safe Transit",
         "policy": "High population density commercial hub. Standard transit."
     }
 }
@@ -359,7 +359,7 @@ def apply_action_recommendations(df: pd.DataFrame) -> pd.DataFrame:
         # Quarter & security tier
         qtr = assign_bamenda_quarter(acc_id)
         quarters.append(qtr)
-        sec_info = BAMENDA_SECURITY_TIERS.get(qtr, {"badge": "🟢 Safe Transit"})
+        sec_info = BAMENDA_SECURITY_TIERS.get(qtr, {"badge": "L1: Safe Transit"})
         security_badges.append(sec_info["badge"])
         
         # Scripts

@@ -39,8 +39,8 @@ from src.contact import (
 
 # Page configuration - Masterpiece Edition
 st.set_page_config(
-    page_title="Skye8 Prioritiser | Haute Masterpiece",
-    page_icon="⚜️",
+    page_title="Skye8 Intelligence | Collections Decision Engine",
+    page_icon="S8",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -57,7 +57,7 @@ def load_data():
     df = pd.read_csv(DATA_PATH)
     if "security_badge" not in df.columns and "bamenda_quarter" in df.columns:
         df["security_badge"] = df["bamenda_quarter"].map(
-            lambda q: BAMENDA_SECURITY_TIERS.get(q, {}).get("badge", "🟢 Safe Transit")
+            lambda q: BAMENDA_SECURITY_TIERS.get(q, {}).get("badge", "L1: Safe Transit")
         )
     return df
 
@@ -499,25 +499,36 @@ st.markdown(textwrap.dedent("""
         }
     }
 
-    /* Refined Streamlit Native Overrides */
+    /* Refined Modern Streamlit Native Overrides */
     div[data-baseweb="tab-list"] {
-        border-bottom: 1px solid #E8DFD4 !important;
-        gap: 16px !important;
+        border-bottom: 1px solid #E2E8F0 !important;
+        gap: 6px !important;
+        padding-bottom: 2px !important;
     }
 
     button[data-baseweb="tab"] {
-        font-family: 'Playfair Display', serif !important;
-        font-size: 15px !important;
-        color: #84756A !important;
+        font-family: 'Plus Jakarta Sans', -apple-system, sans-serif !important;
+        font-size: 13px !important;
+        font-weight: 500 !important;
+        letter-spacing: 0.02em !important;
+        color: #64748B !important;
         background-color: transparent !important;
         border: none !important;
-        padding: 10px 4px !important;
+        padding: 8px 14px !important;
+        border-radius: 6px !important;
+        transition: all 0.15s ease !important;
+    }
+
+    button[data-baseweb="tab"]:hover {
+        color: #0F172A !important;
+        background-color: rgba(0, 0, 0, 0.03) !important;
     }
 
     button[aria-selected="true"] {
-        color: #15100E !important;
+        color: #0F172A !important;
         font-weight: 600 !important;
         border-bottom: 2px solid #C5A059 !important;
+        background-color: transparent !important;
     }
 
     .stDownloadButton button {
@@ -551,17 +562,21 @@ if df_raw.empty:
 with st.sidebar:
     st.markdown(textwrap.dedent("""
     <div class="sidebar-brand-block">
-        <div class="sidebar-crest">⚜️</div>
-        <h2 class="sidebar-title">SKYE8 PRIORITISER</h2>
-        <div class="sidebar-subtitle">Haute Collections Intelligence &bull; Bamenda</div>
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+            <div style="width: 32px; height: 32px; background: linear-gradient(135deg, #C5A059 0%, #8D6B32 100%); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; color: #120D0B; letter-spacing: -0.04em;">S8</div>
+            <div>
+                <h2 class="sidebar-title" style="font-size: 16px; margin: 0; line-height: 1.2;">SKYE8 INTELLIGENCE</h2>
+                <div class="sidebar-subtitle" style="margin-top: 1px;">Collections Decision Engine &bull; Bamenda</div>
+            </div>
+        </div>
         <div class="sidebar-status-pill">
             <span class="pulse-dot"></span>
-            Production Calibrated &bull; Adaptable Engine
+            Production Calibrated &bull; Adaptable Prior
         </div>
     </div>
     """), unsafe_allow_html=True)
     
-    st.markdown("### 🎛️ Strategic Policy & Mandate")
+    st.markdown("### STRATEGIC MANDATE & POLICY")
     
     strategic_objective = st.selectbox(
         "Optimization Objective",
@@ -585,7 +600,7 @@ with st.sidebar:
     # Apply branch adaptation
     st.session_state.adaptable_engine.adapt_to_branch(branch_archetype)
 
-    st.markdown("### 🔍 Portfolio Filters")
+    st.markdown("### PORTFOLIO FILTERS")
     
     officers = ["All Collections Officers"] + sorted(df_raw["assigned_officer"].unique().tolist())
     selected_officer = st.selectbox("Assignee Filter", officers)
@@ -604,14 +619,14 @@ with st.sidebar:
     min_prob = st.slider("Minimum Cure Probability", 0.0, 1.0, 0.0, 0.05)
 
     # Search Bar inside Sidebar
-    search_query = st.text_input("🔍 Search Account or Loan Ref", placeholder="e.g. 103380")
+    search_query = st.text_input("Search Borrower ID or Loan Reference", placeholder="e.g. 103380")
 
     st.markdown("---")
     
     # Live Officer Caseload Card
     st.markdown(textwrap.dedent("""
     <div class="sidebar-card">
-        <div class="sidebar-card-title">👥 Officer Caseload Distribution</div>
+        <div class="sidebar-card-title">OFFICER CASELOAD ALLOCATION</div>
     """), unsafe_allow_html=True)
     
     officer_counts = df_raw["assigned_officer"].value_counts()
@@ -628,7 +643,7 @@ with st.sidebar:
     st.markdown("</div>", unsafe_allow_html=True)
     
     # 1-Click Offline Export in Sidebar
-    st.markdown("### 📥 Field Mobility")
+    st.markdown("### FIELD MOBILITY EXPORT")
     csv_buffer = io.StringIO()
     df_raw.to_csv(csv_buffer, index=False)
     st.download_button(
@@ -850,33 +865,33 @@ Causal Segment: <strong style="color: #A67C48;">{segment}</strong> &bull; Settle
         # EXPLAINABLE AI (XAI) TOP DRIVERS WATERFALL
         # -----------------------------------------------------
         st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
-        st.markdown("#### 🧬 Explainable AI (XAI) — Top Decision Drivers")
-        st.caption("Exact behavioral and macro-seasonal factors driving this borrower's cure probability score.")
+        st.markdown("#### Explainable AI (XAI) Attribution Breakdown")
+        st.caption("Exact behavioral and macro-seasonal drivers impacting this borrower's cure probability score.")
         
         col_xai1, col_xai2 = st.columns(2)
         with col_xai1:
-            st.markdown("**Top Positive Factors (+ Uplift to Score)**")
+            st.markdown("**Positive Attribution (+ Lift to Score)**")
             pos_factors = str(acc.get("xai_top_positive", "")).split(" | ")
             for pf in pos_factors:
                 if pf.strip():
-                    st.markdown(f'<div class="xai-pill-pos"><span>🟢 {pf}</span><span style="font-weight:700;">+ Impact</span></div>', unsafe_allow_html=True)
+                    st.markdown(f'<div class="xai-pill-pos"><span style="font-weight: 500;">{pf}</span><span class="badge-pos">+ LIFT</span></div>', unsafe_allow_html=True)
         with col_xai2:
-            st.markdown("**Top Negative Factors (- Drag on Recovery)**")
+            st.markdown("**Negative Attribution (- Drag on Score)**")
             neg_factors = str(acc.get("xai_top_negative", "")).split(" | ")
             for nf in neg_factors:
                 if nf.strip():
-                    st.markdown(f'<div class="xai-pill-neg"><span>🔴 {nf}</span><span style="font-weight:700;">- Drag</span></div>', unsafe_allow_html=True)
+                    st.markdown(f'<div class="xai-pill-neg"><span style="font-weight: 500;">{nf}</span><span class="badge-neg">&minus; DRAG</span></div>', unsafe_allow_html=True)
 
         # -----------------------------------------------------
         # MULTILINGUAL ENGAGEMENT SCRIPTS (ENGLISH & PIDGIN)
         # -----------------------------------------------------
         st.markdown("<div style='height: 18px;'></div>", unsafe_allow_html=True)
-        st.markdown("#### 🗣️ Culturally Tailored Outreach Scripts")
-        st.caption("1-Click dialogue template calibrated to the borrower's hardship status and regional language.")
+        st.markdown("#### Localized Borrower Communication Protocols")
+        st.caption("Standardized dialogue calibrated to the borrower's hardship status and regional language.")
         
         script_lang = st.radio(
             "Select Communication Language",
-            ["🇬🇧 Formal English (Standard MFI Letter / Notice)", "🇨🇲 Cameroon Pidgin English (Respectful Community Dialect)"],
+            ["Formal English (Standard Notice)", "Cameroon Pidgin English (Community Outreach)"],
             horizontal=True
         )
         
@@ -886,7 +901,7 @@ Causal Segment: <strong style="color: #A67C48;">{segment}</strong> &bull; Settle
             chosen_script = acc.get("script_pidgin", "Pidgin script unavailable.")
             
         st.text_area(
-            label="Officer Outreach Dialogue / WhatsApp Message",
+            label="Officer Outreach Dialogue / SMS Message",
             value=chosen_script,
             height=120,
             help="Copy directly into SMS, WhatsApp, or read to borrower during telephone/field contact."
@@ -896,17 +911,17 @@ Causal Segment: <strong style="color: #A67C48;">{segment}</strong> &bull; Settle
         # LOCAL INNOVATION 1: MOBILE MONEY 1-CLICK USSD CODES
         # -----------------------------------------------------
         st.markdown("<div style='height: 18px;'></div>", unsafe_allow_html=True)
-        st.markdown("#### 📱 Mobile Money 1-Click USSD Dial Codes (Cameroon)")
+        st.markdown("#### Mobile Money Instant Settlement Codes (USSD)")
         st.caption("Frictionless digital recovery via MTN MoMo and Orange Money to eliminate cash transit risks.")
         
         momo_data = generate_momo_ussd_strings(acc['overdue_amount'], acc['SK_ID_PREV'])
         col_momo1, col_momo2 = st.columns(2)
         with col_momo1:
-            st.markdown("##### 🟡 MTN Mobile Money (MoMo)")
+            st.markdown("##### MTN Mobile Money (MoMo)")
             st.code(momo_data["mtn_ussd"], language="text")
             st.caption("Credit Union Till: 705001 • Direct settlement into MFI treasury.")
         with col_momo2:
-            st.markdown("##### 🟠 Orange Money Cameroun")
+            st.markdown("##### Orange Money Cameroun")
             st.code(momo_data["orange_ussd"], language="text")
             st.caption("Orange Partner Code: 705001 • Instant automated clearing.")
         
@@ -917,7 +932,7 @@ Causal Segment: <strong style="color: #A67C48;">{segment}</strong> &bull; Settle
         # -----------------------------------------------------
         col_innov1, col_innov2 = st.columns(2)
         with col_innov1:
-            st.markdown("#### 🪙 Trader Daily 'Small-Small' Plan")
+            st.markdown("#### Informal Trader Daily Restructuring ('Small-Small')")
             st.caption("Restructure lump-sum debt into daily micro-installments matching market cash velocity.")
             tenor_choice = st.select_slider(
                 "Restructuring Horizon",
@@ -934,7 +949,7 @@ Causal Segment: <strong style="color: #A67C48;">{segment}</strong> &bull; Settle
             st.markdown(f"**Agreement Terms:** `{micro_res['plan_text']}`")
 
         with col_innov2:
-            st.markdown("#### 🌍 Diaspora Sponsor & Guarantor Protocol")
+            st.markdown("#### Remote Diaspora Sponsor & Guarantor Notice")
             st.caption("Formal notice for family sponsors in Douala, Yaoundé, or Abroad to settle remotely.")
             diaspora_note = generate_diaspora_sponsor_script(
                 int(acc['SK_ID_CURR']),
@@ -953,7 +968,7 @@ Causal Segment: <strong style="color: #A67C48;">{segment}</strong> &bull; Settle
         # ACTIVE LEARNING HUMAN-IN-THE-LOOP FIELD LOGGER
         # -----------------------------------------------------
         st.markdown("<div style='height: 18px;'></div>", unsafe_allow_html=True)
-        st.markdown("#### 📝 Record Officer Contact Outcome (Continuous Active Learning)")
+        st.markdown("#### Log Field Contact Outcome (Continuous Active Learning)")
         st.caption("Logging an outcome immediately adapts the machine learning prior for this account and its cohort.")
         
         log_col1, log_col2, log_col3 = st.columns([2, 2.5, 1.2])
@@ -978,7 +993,7 @@ Causal Segment: <strong style="color: #A67C48;">{segment}</strong> &bull; Settle
         with log_col3:
             st.write("")
             st.write("")
-            if st.button("💾 Save & Adapt Model", key=f"btn_{acc['SK_ID_CURR']}"):
+            if st.button("Commit Outcome & Adapt Prior", key=f"btn_{acc['SK_ID_CURR']}"):
                 adj = st.session_state.adaptable_engine.incorporate_field_feedback(acc['SK_ID_CURR'], outcome)
                 st.session_state.logged_feedback.append({
                     "Account ID": acc['SK_ID_CURR'],
@@ -987,7 +1002,7 @@ Causal Segment: <strong style="color: #A67C48;">{segment}</strong> &bull; Settle
                     "Notes": notes,
                     "Adaptation Delta": f"{adj:+.1%}"
                 })
-                st.success(f"✓ Field record logged! Model adapted: {adj:+.1%} probability update for Client #{acc['SK_ID_CURR']}.")
+                st.success(f"Outcome recorded. Bayesian model adapted: {adj:+.1%} for Client #{acc['SK_ID_CURR']}.")
                 st.rerun()
 
 # -------------------------------------------------------------
@@ -1002,7 +1017,7 @@ with tab_table:
         officer_buf = io.StringIO()
         df_filtered.to_csv(officer_buf, index=False)
         st.download_button(
-            label=f"📥 Export Current View ({len(df_filtered)} Rows)",
+            label=f"Export Call Roster ({len(df_filtered)} Rows)",
             data=officer_buf.getvalue(),
             file_name="Prioritised_Call_Roster.csv",
             mime="text/csv"
@@ -1036,7 +1051,7 @@ with tab_table:
             "Settlement %": "{:.1%}",
             "Cost (FCFA)": "{:,.0f}",
             "Expected Yield (FCFA)": "{:,.0f}",
-            "Protected": lambda x: "🛡️ Protected" if x else "Standard"
+            "Protected": lambda x: "Protected" if x else "Standard"
         }),
         height=500
     )
@@ -1045,7 +1060,7 @@ with tab_table:
 # TAB 3: MODEL ADAPTABILITY STUDIO
 # -------------------------------------------------------------
 with tab_adaptability:
-    st.markdown("### 🎛️ Model Adaptability & Calibration Studio")
+    st.markdown("### Model Adaptability & Calibration Studio")
     st.caption("Empowering credit union risk officers to dynamically adapt priors, calibrate macro-economic shocks, and inspect online active learning telemetry.")
     
     adapt_c1, adapt_c2 = st.columns([1.2, 1.8])
@@ -1078,7 +1093,7 @@ with tab_adaptability:
         if st.session_state.logged_feedback:
             feedback_df = pd.DataFrame(st.session_state.logged_feedback)
             st.dataframe(feedback_df, height=220, hide_index=True)
-            if st.button("🔄 Reset Feedback Memory"):
+            if st.button("Reset Bayesian Feedback Memory"):
                 st.session_state.adaptable_engine.feedback_adjustments.clear()
                 st.session_state.logged_feedback.clear()
                 st.success("Feedback memory reset.")
@@ -1087,7 +1102,7 @@ with tab_adaptability:
             st.info("No field outcomes logged yet in this session. Log outcomes in Tab 1 (Dossier Inspector) to see the model adapt live!")
             
         st.markdown("---")
-        st.markdown("#### 🛡️ Missing Modality & Incomplete Schema Stress Test")
+        st.markdown("#### Schema Resilience & Missing Modality Stress Test")
         st.caption("Demonstrating how the engine adapts gracefully when an institution lacks Credit Bureau or POS Cash records:")
         
         col_stress1, col_stress2 = st.columns(2)
@@ -1095,7 +1110,7 @@ with tab_adaptability:
             st.markdown(textwrap.dedent("""
             <div style="background:#FFFFFF; border:1px solid #EAE2D7; border-radius:8px; padding:12px;">
                 <strong>Scenario A: Full Multi-Source Roster</strong><br>
-                <span style="font-size:12px; color:#2E5A36;">✓ Installments + Application + Bureau + POS Cash</span><br>
+                <span style="font-size:12px; color:#2E5A36; font-weight:600;">[Active] Installments + Application + Bureau + POS Cash</span><br>
                 <span style="font-size:11px; color:#84756A;">Prediction Accuracy: High fidelity (PR-AUC: 0.929)</span>
             </div>
             """), unsafe_allow_html=True)
@@ -1103,7 +1118,7 @@ with tab_adaptability:
             st.markdown(textwrap.dedent("""
             <div style="background:#FFFFFF; border:1px solid #EAE2D7; border-radius:8px; padding:12px;">
                 <strong>Scenario B: Installments Only (Cold-Start MFI)</strong><br>
-                <span style="font-size:12px; color:#A67C48;">✓ Graceful Domain Imputation Fallback</span><br>
+                <span style="font-size:12px; color:#A67C48; font-weight:600;">[Graceful Fallback] Domain Imputation Active</span><br>
                 <span style="font-size:11px; color:#84756A;">Prediction Accuracy: Robust baseline (PR-AUC: 0.894)</span>
             </div>
             """), unsafe_allow_html=True)
@@ -1190,7 +1205,7 @@ with tab_roi:
         # LOCAL INNOVATION 4: COBAC REGULATION R-2017/07 CAPITAL SHIELD
         # -----------------------------------------------------
         st.markdown("<div style='height: 18px;'></div>", unsafe_allow_html=True)
-        st.markdown("#### 🛡️ COBAC Regulation R-2017/07 Capital Shield & Prudential Reserves Saved")
+        st.markdown("#### COBAC Regulation R-2017/07 Capital Shield & Prudential Reserves Saved")
         st.caption("Central African Banking Commission (COBAC) mandatory write-down provisions preserved by early cure (Day 15).")
         
         cobac_res = calculate_cobac_regulatory_savings(
@@ -1291,14 +1306,14 @@ with tab_routes:
     # -----------------------------------------------------
     # LOCAL INNOVATION 5: BAMENDA SECURITY TIERS & SAFETY PROTOCOL
     # -----------------------------------------------------
-    st.markdown("#### 🛡️ Bamenda Quarter Security Risk & Safe Transit Guide")
+    st.markdown("#### Bamenda Quarter Security Risk & Safe Transit Guide")
     st.caption("Real-time safety classification to protect motorcycle field officers navigating Mezam division arterial roads.")
     
     sec_col1, sec_col2 = st.columns(2)
     with sec_col1:
         st.markdown(textwrap.dedent("""
         <div style="background-color: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 8px; padding: 14px;">
-            <div style="font-weight: 700; color: #166534; font-size: 13px;">🟢 Safe Transit Zones (Low Risk)</div>
+            <div style="font-weight: 700; color: #166534; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase;">Level 1: Safe Transit Zones (Low Risk)</div>
             <div style="font-size: 12px; color: #15803D; margin-top: 4px; line-height: 1.5;">
                 Commercial Avenue, Up Station, Old Council, Food Market, Mile 2/3.<br>
                 <em>Protocol:</em> Standard operational transit; normal business hours (08:00 – 17:30).
@@ -1308,7 +1323,7 @@ with tab_routes:
     with sec_col2:
         st.markdown(textwrap.dedent("""
         <div style="background-color: #FEFCE8; border: 1px solid #FEF08A; border-radius: 8px; padding: 14px;">
-            <div style="font-weight: 700; color: #854D0E; font-size: 13px;">🟡 Daytime Caution Zones (Moderate Risk)</div>
+            <div style="font-weight: 700; color: #854D0E; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase;">Level 2: Daytime Caution Zones (Moderate Risk)</div>
             <div style="font-size: 12px; color: #A16207; margin-top: 4px; line-height: 1.5;">
                 Nkwen, Mankon, Mile 4, Hospital Roundabout, Ngeng Junction.<br>
                 <em>Protocol:</em> Complete motorcycle transit before 16:30; stay on main paved axes; travel in pairs if handling physical cash.
@@ -1317,12 +1332,12 @@ with tab_routes:
         """), unsafe_allow_html=True)
 
     st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
-    st.markdown("#### 🗺️ Clustered Motorcycle Itinerary with Security Badges")
+    st.markdown("#### Clustered Field Itinerary & Security Tiers")
     
     route_view_df = df_raw[df_raw["recommended_channel"] == "FIELD_VISIT"].copy()
     if "security_badge" not in route_view_df.columns:
         route_view_df["security_badge"] = route_view_df["bamenda_quarter"].map(
-            lambda q: BAMENDA_SECURITY_TIERS.get(q, {}).get("badge", "🟢 Safe Transit")
+            lambda q: BAMENDA_SECURITY_TIERS.get(q, {}).get("badge", "L1: Safe Transit")
         )
     if selected_zone_for_route != "All Quarters":
         route_view_df = route_view_df[route_view_df["bamenda_quarter"] == selected_zone_for_route]
@@ -1408,7 +1423,7 @@ with tab_docket:
             
             <div style="border-top: 1px dashed #A67C48; padding-top: 16px; margin-top: 14px;">
                 <div style="font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 600; color: #1F1815; margin-bottom: 6px;">
-                    ✂️ MEMBER REPAYMENT PLEDGE COMMITMENT (TEAR-OFF SLIP)
+                    MEMBER REPAYMENT PLEDGE COMMITMENT (OFFICIAL SLIP)
                 </div>
                 <div style="font-size: 12px; color: #5C5047; line-height: 1.6; margin-bottom: 12px;">
                     I, member of account <strong>#{doc_row['SK_ID_CURR']}</strong>, hereby acknowledge the overdue balance of <strong>{doc_row['overdue_amount']:,.0f} FCFA</strong>.
