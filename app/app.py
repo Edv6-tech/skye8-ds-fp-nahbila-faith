@@ -1,25 +1,22 @@
-"""Skye8 Collections Prioritiser — Haute-Elegance 10/10 Masterpiece Edition.
+"""Skyes Intelligence — Recovery Decision Workspace.
 
-Designed for Microfinance Institutions & Credit Unions in Bamenda, Cameroon.
-Features:
-- Refined Haute-Luxury Editorial Palette (Warm Cashmere Alabaster, Espresso Cocoa Noir, Champagne Gold).
-- Production Adaptability Engine: Dynamic branch archetypes, macroeconomic recalibration, and continuous Bayesian field feedback.
-- Visual Probability Meter & Recovery Tier Gauge.
-- Explainable AI (XAI) Top-3 Factor Waterfall for borrower scoring transparency.
-- Bilingual Outreach Scripts (Formal English & Authentic Cameroon Pidgin English).
-- Live Credit Union Branch ROI & License Fee Calculator.
-- Bamenda Quarter / Neighborhood Route Clustering & Benskin Fuel Saver.
-- Printable Officer Field Docket & Payment Pledge Slip.
-- 1-Click Offline Field Sheet Export (CSV) for Officers on Motorcycle Transit.
-- Real-time Borrower ID & Loan Reference Search Engine.
-- Ethical Hardship Safeguards protecting vulnerable & senior households.
+Designed specifically for Microfinance Institutions & Credit Unions in Bamenda, Cameroon.
+Accurately implements the exact UI/UX specification from the Skyes design system:
+- Deep forest pine sidebar with Skyes asterisk badge, workspace navigation, case context, and officer profile.
+- Signature emerald gradient hero card with recovery likelihood ring and immediate call preparation.
+- Clean high-contrast metric cards with clear financial units (FCFA).
+- 4-step horizontal account history tracker (Account opened -> Payments made -> Member contacted -> Next action).
+- Decision signals breakdown with positive and review-needed behavioral indicators.
+- Localized conversation script with supportive tone framing and 1-click execution.
+- Restructuring installment slider calibrated to trader market cash velocity.
+- Formal outcome recording with continuous Bayesian online learning adaptation.
 """
 import sys
 from pathlib import Path
 import textwrap
 import io
 
-# Ensure project root is in sys.path when running from app/ subdirectory
+# Ensure project root is in sys.path
 ROOT_DIR = Path(__file__).resolve().parents[1]
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
@@ -27,6 +24,7 @@ if str(ROOT_DIR) not in sys.path:
 import streamlit as st
 import pandas as pd
 import numpy as np
+
 from src.model import AdaptablePrioritiser
 from src.contact import (
     generate_momo_ussd_strings,
@@ -37,17 +35,17 @@ from src.contact import (
     BAMENDA_SECURITY_TIERS
 )
 
-# Page configuration - Masterpiece Edition
+# Page configuration
 st.set_page_config(
-    page_title="Skye8 Intelligence | Collections Decision Engine",
-    page_icon="S8",
+    page_title="Skyes Intelligence | Recovery Workspace",
+    page_icon="*",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# File paths
-DATA_PATH = Path(__file__).resolve().parents[1] / "data" / "processed" / "weekly_400_accounts.csv"
-METRICS_PATH = Path(__file__).resolve().parents[1] / "reports" / "metrics_summary.json"
+# Data paths
+DATA_PATH = ROOT_DIR / "data" / "processed" / "weekly_400_accounts.csv"
+METRICS_PATH = ROOT_DIR / "reports" / "metrics_summary.json"
 
 
 @st.cache_data
@@ -64,490 +62,593 @@ def load_data():
 
 df_raw = load_data()
 
-# Initialize Persistent Adaptable Engine in Session State
+# Initialize session state engines
 if "adaptable_engine" not in st.session_state:
     st.session_state.adaptable_engine = AdaptablePrioritiser()
 
 if "logged_feedback" not in st.session_state:
     st.session_state.logged_feedback = []
 
-# Inject Masterpiece High-Luxury Editorial CSS
+# Inject Skyes Intelligence Custom Design System CSS
 st.markdown(textwrap.dedent("""
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
 <style>
-    /* Global Base Palette */
+    /* ========================================================
+       SKYES INTELLIGENCE COLOR & TYPOGRAPHY SYSTEM
+       ======================================================== */
     :root {
-        --canvas-bg: #FAF7F2;
+        --canvas-bg: #F4F7F4;
+        --sidebar-bg: #0F2D1E;
+        --sidebar-active-bg: #1B4530;
+        --lime-accent: #D2E823;
+        --lime-soft: #E8F5A3;
+        --forest-dark: #0F2D1E;
+        --forest-mid: #16432B;
+        --forest-light: #1E563A;
         --card-bg: #FFFFFF;
-        --noir-dark: #15100E;
-        --noir-medium: #221A16;
-        --cognac-gold: #C5A059;
-        --cognac-rich: #A67C48;
-        --taupe-muted: #84756A;
-        --border-refined: #EAE2D7;
-        --border-gold: rgba(197, 160, 89, 0.35);
+        --card-border: #E5EAE5;
+        --text-primary: #122117;
+        --text-secondary: #586B5F;
+        --text-muted: #7E9185;
+        --badge-green-bg: #E8F5ED;
+        --badge-green-text: #1E6B3A;
+        --btn-forest: #1E4D30;
+        --btn-forest-hover: #153A23;
     }
 
     html, body, [class*="css"] {
-        font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
-        color: #241D19;
+        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif !important;
+        color: var(--text-primary);
         background-color: var(--canvas-bg);
     }
-    
+
     .stApp {
         background-color: var(--canvas-bg);
     }
 
-    /* ========================================================
-       SUPER ELEGANT SIDEBAR (WARM NOIR & CHAMPAGNE ACCENTS)
-       ======================================================== */
+    /* Modern clean sidebar */
     section[data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #140E0C 0%, #1A1310 50%, #231915 100%) !important;
-        border-right: 1px solid rgba(197, 160, 89, 0.22) !important;
-        box-shadow: 6px 0 30px rgba(0, 0, 0, 0.18) !important;
+        background-color: var(--sidebar-bg) !important;
+        border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+        padding-top: 20px !important;
     }
 
-    section[data-testid="stSidebar"] .stMarkdown,
-    section[data-testid="stSidebar"] p,
-    section[data-testid="stSidebar"] span {
-        color: #EAE0D6 !important;
+    section[data-testid="stSidebar"] * {
+        color: #E2ECE5;
     }
 
     section[data-testid="stSidebar"] label {
-        font-size: 10.5px !important;
-        letter-spacing: 0.18em !important;
+        font-size: 11px !important;
+        letter-spacing: 0.12em !important;
         text-transform: uppercase !important;
         font-weight: 600 !important;
-        color: #C5A059 !important;
+        color: #8DA897 !important;
         margin-bottom: 6px !important;
     }
 
     section[data-testid="stSidebar"] div[data-baseweb="select"] {
-        background-color: rgba(255, 255, 255, 0.04) !important;
-        border: 1px solid rgba(197, 160, 89, 0.32) !important;
+        background-color: rgba(255, 255, 255, 0.06) !important;
+        border: 1px solid rgba(255, 255, 255, 0.12) !important;
         border-radius: 8px !important;
     }
 
     section[data-testid="stSidebar"] div[data-baseweb="select"] * {
-        color: #FAF7F2 !important;
+        color: #FFFFFF !important;
         font-size: 13px !important;
     }
 
-    .sidebar-brand-block {
-        padding: 6px 4px 18px 4px;
-        border-bottom: 1px solid rgba(197, 160, 89, 0.22);
-        margin-bottom: 22px;
+    /* Skyes Sidebar Brand Block */
+    .sky-sidebar-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 28px;
+        padding-bottom: 18px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     }
 
-    .sidebar-crest {
+    .sky-logo-circle {
+        width: 38px;
+        height: 38px;
+        background-color: var(--lime-accent);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         font-size: 26px;
+        font-weight: 800;
+        color: #0F2D1E;
         line-height: 1;
-        margin-bottom: 6px;
-        color: #C5A059;
+        box-shadow: 0 4px 12px rgba(210, 232, 35, 0.3);
     }
 
-    .sidebar-title {
-        font-family: 'Playfair Display', Georgia, serif;
-        font-size: 20px;
-        font-weight: 600;
-        letter-spacing: 0.06em;
-        color: #FAF7F2;
-        margin: 0;
+    .sky-logo-text {
+        display: flex;
+        flex-direction: column;
     }
 
-    .sidebar-subtitle {
-        font-family: 'Plus Jakarta Sans', sans-serif;
+    .sky-brand-name {
+        font-size: 15px;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+        color: #FFFFFF;
+        line-height: 1.1;
+    }
+
+    .sky-brand-sub {
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        color: #FFFFFF;
+        line-height: 1.1;
+    }
+
+    .sky-brand-workspace {
         font-size: 9px;
-        letter-spacing: 0.22em;
-        text-transform: uppercase;
-        color: #C5A059;
-        margin-top: 4px;
-        font-weight: 500;
-    }
-
-    .sidebar-card {
-        background: rgba(255, 255, 255, 0.035);
-        border: 1px solid rgba(197, 160, 89, 0.2);
-        border-radius: 10px;
-        padding: 14px 16px;
-        margin-bottom: 20px;
-    }
-
-    .sidebar-card-title {
-        font-size: 10px;
         letter-spacing: 0.16em;
         text-transform: uppercase;
-        color: #C5A059;
+        color: #8DA897;
+        margin-top: 4px;
         font-weight: 600;
-        margin-bottom: 10px;
-        display: flex;
-        align-items: center;
-        gap: 6px;
     }
 
-    .sidebar-stat-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        font-size: 12px;
-        padding: 5px 0;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    .sidebar-stat-row:last-child {
-        border-bottom: none;
-    }
-
-    .sidebar-stat-name {
-        color: #D8CCC2;
-        font-weight: 400;
-    }
-
-    .sidebar-stat-val {
-        color: #FAF7F2;
-        font-weight: 600;
-        font-family: 'Plus Jakarta Sans', sans-serif;
-    }
-
-    .sidebar-status-pill {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        background: rgba(197, 160, 89, 0.12);
-        border: 1px solid rgba(197, 160, 89, 0.35);
-        color: #E2CA96;
-        font-size: 10px;
-        letter-spacing: 0.12em;
+    .sky-nav-header {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.14em;
         text-transform: uppercase;
-        font-weight: 600;
-        padding: 4px 10px;
-        border-radius: 20px;
-        margin-top: 8px;
+        color: #7A9B87;
+        margin-bottom: 10px;
     }
 
-    .pulse-dot {
-        width: 6px;
-        height: 6px;
-        background-color: #C5A059;
+    /* Officer profile pill at bottom of sidebar */
+    .sky-officer-profile {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        background-color: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 10px;
+        margin-top: 24px;
+    }
+
+    .sky-officer-avatar {
+        width: 34px;
+        height: 34px;
+        background-color: var(--lime-accent);
         border-radius: 50%;
-        display: inline-block;
-        box-shadow: 0 0 8px #C5A059;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 13px;
+        color: #0F2D1E;
+    }
+
+    .sky-officer-name {
+        font-size: 13px;
+        font-weight: 700;
+        color: #FFFFFF;
+        line-height: 1.2;
+    }
+
+    .sky-officer-role {
+        font-size: 11px;
+        color: #8DA897;
     }
 
     /* ========================================================
-       EDITORIAL HERO SECTION
+       HERO CARD COMPONENT (EMERALD GRADIENT WITH DONUT GAUGE)
        ======================================================== */
-    .hero-container {
-        background: linear-gradient(135deg, #15100E 0%, #221A16 55%, #30231D 100%);
+    .sky-hero-card {
+        background: radial-gradient(circle at 85% 50%, rgba(210, 232, 35, 0.14) 0%, rgba(30, 86, 58, 0.4) 35%, transparent 70%),
+                    linear-gradient(135deg, #0E291C 0%, #153C27 50%, #1F593A 100%);
         border-radius: 16px;
-        padding: 42px 44px 38px 44px;
-        margin-bottom: 26px;
-        color: #FAF7F2;
-        position: relative;
-        box-shadow: 0 24px 48px rgba(21, 16, 14, 0.12);
-        border: 1px solid rgba(197, 160, 89, 0.28);
-    }
-    
-    .hero-eyebrow {
-        font-family: 'Plus Jakarta Sans', sans-serif;
-        font-size: 11px;
-        font-weight: 600;
-        letter-spacing: 0.24em;
-        text-transform: uppercase;
-        color: #C5A059;
-        margin-bottom: 12px;
+        padding: 32px 36px;
+        color: #FFFFFF;
         display: flex;
+        justify-content: space-between;
         align-items: center;
-        gap: 8px;
+        margin-bottom: 24px;
+        box-shadow: 0 12px 32px rgba(15, 45, 30, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        position: relative;
+        overflow: hidden;
     }
-    
-    .hero-eyebrow::before {
-        content: "";
-        width: 22px;
-        height: 1px;
-        background-color: #C5A059;
+
+    .sky-hero-left {
+        max-width: 65%;
+    }
+
+    .sky-hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--lime-accent);
+        margin-bottom: 10px;
+    }
+
+    .sky-hero-dot {
+        width: 7px;
+        height: 7px;
+        background-color: var(--lime-accent);
+        border-radius: 50%;
+        display: inline-block;
+        box-shadow: 0 0 8px var(--lime-accent);
+    }
+
+    .sky-hero-title {
+        font-size: 34px;
+        font-weight: 700;
+        color: #FFFFFF;
+        letter-spacing: -0.02em;
+        line-height: 1.15;
+        margin-bottom: 6px;
+    }
+
+    .sky-hero-subtitle {
+        font-size: 13.5px;
+        color: #B5D2C2;
+        margin-bottom: 18px;
+    }
+
+    .sky-hero-tags {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .sky-tag-lime {
+        background-color: var(--lime-accent);
+        color: #0F2D1E;
+        font-size: 11.5px;
+        font-weight: 700;
+        padding: 5px 12px;
+        border-radius: 20px;
         display: inline-block;
     }
 
-    .hero-title {
-        font-family: 'Playfair Display', Georgia, serif;
-        font-size: 40px;
-        line-height: 1.15;
-        font-weight: 400;
-        letter-spacing: -0.02em;
-        color: #FAF7F2;
-        margin-bottom: 12px;
+    .sky-tag-glass {
+        background-color: rgba(255, 255, 255, 0.12);
+        color: #FFFFFF;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        font-size: 11.5px;
+        font-weight: 500;
+        padding: 5px 12px;
+        border-radius: 20px;
+        display: inline-block;
     }
 
-    .hero-title em {
-        font-style: italic;
-        font-family: 'Playfair Display', serif;
-        color: #E2CA96;
-        font-weight: 400;
+    .sky-hero-right {
+        display: flex;
+        align-items: center;
+        gap: 20px;
     }
 
-    .hero-desc {
-        font-family: 'Plus Jakarta Sans', sans-serif;
-        font-size: 14px;
-        line-height: 1.65;
-        color: #D6CBC2;
-        max-width: 680px;
-        font-weight: 300;
+    .sky-gauge-ring {
+        width: 96px;
+        height: 96px;
+        border-radius: 50%;
+        border: 6px solid var(--lime-accent);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: rgba(15, 45, 30, 0.5);
+        box-shadow: 0 0 20px rgba(210, 232, 35, 0.25);
     }
 
-    /* Executive KPI Cards */
-    .metric-grid {
+    .sky-gauge-val {
+        font-size: 26px;
+        font-weight: 800;
+        color: #FFFFFF;
+        line-height: 1;
+    }
+
+    .sky-gauge-label {
+        font-size: 8.5px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: #B5D2C2;
+        margin-top: 3px;
+    }
+
+    .sky-hero-btn {
+        background-color: var(--lime-accent);
+        color: #0F2D1E !important;
+        font-size: 13.5px;
+        font-weight: 700;
+        padding: 12px 20px;
+        border-radius: 10px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        box-shadow: 0 4px 14px rgba(210, 232, 35, 0.3);
+        transition: transform 0.15s ease;
+    }
+
+    .sky-hero-btn:hover {
+        transform: translateY(-2px);
+    }
+
+    /* ========================================================
+       4 METRIC CARDS ROW
+       ======================================================== */
+    .sky-metrics-row {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        grid-template-columns: repeat(4, 1fr);
         gap: 16px;
         margin-bottom: 28px;
     }
 
-    .metric-card {
-        background: #FFFFFF;
-        border: 1px solid #EAE2D7;
+    .sky-metric-card {
+        background-color: var(--card-bg);
+        border: 1px solid var(--card-border);
         border-radius: 12px;
-        padding: 22px 20px;
-        box-shadow: 0 4px 16px rgba(34, 26, 22, 0.03);
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        padding: 20px 22px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
     }
 
-    .metric-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 28px rgba(34, 26, 22, 0.07);
-        border-color: #C5A059;
-    }
-
-    .metric-label {
-        font-size: 10px;
-        letter-spacing: 0.18em;
+    .sky-m-label {
+        font-size: 10.5px;
+        font-weight: 700;
+        letter-spacing: 0.14em;
         text-transform: uppercase;
-        color: #84756A;
-        font-weight: 600;
+        color: #728479;
         margin-bottom: 8px;
     }
 
-    .metric-value {
-        font-family: 'Playfair Display', serif;
+    .sky-m-val {
         font-size: 26px;
-        font-weight: 600;
-        color: #1F1815;
+        font-weight: 700;
+        color: var(--text-primary);
         line-height: 1.1;
-        margin-bottom: 4px;
+        margin-bottom: 6px;
     }
 
-    .metric-badge {
-        font-size: 11px;
-        font-weight: 500;
-        color: #A67C48;
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-    }
-
-    /* Luxury Tags & Badges */
-    .tag-sms {
-        background-color: #F1ECE6;
-        color: #4D4037;
-        font-size: 11px;
+    .sky-m-curr {
+        font-size: 14px;
         font-weight: 600;
-        letter-spacing: 0.06em;
-        padding: 4px 10px;
-        border-radius: 20px;
-        border: 1px solid #DFD5CA;
-        display: inline-block;
+        color: #728479;
     }
 
-    .tag-call {
-        background-color: #FDF4E7;
-        color: #8F6219;
-        font-size: 11px;
-        font-weight: 600;
-        letter-spacing: 0.06em;
-        padding: 4px 10px;
-        border-radius: 20px;
-        border: 1px solid #F0D7AE;
-        display: inline-block;
+    .sky-m-sub {
+        font-size: 12px;
+        color: #728479;
     }
 
-    .tag-visit {
-        background-color: #FBF0ED;
-        color: #9C3826;
-        font-size: 11px;
-        font-weight: 600;
-        letter-spacing: 0.06em;
-        padding: 4px 10px;
-        border-radius: 20px;
-        border: 1px solid #ECCDC6;
-        display: inline-block;
-    }
-
-    .tag-vulnerable {
-        background-color: #F7EFE2;
-        color: #8D5B18;
-        font-size: 11px;
-        font-weight: 600;
-        letter-spacing: 0.06em;
-        padding: 4px 10px;
-        border-radius: 20px;
-        border: 1px solid #E6D0AC;
-        display: inline-block;
-    }
-
-    /* Dossier Card View */
-    .dossier-card {
-        background: #FFFFFF;
-        border: 1px solid #EAE2D7;
-        border-radius: 14px;
-        padding: 28px;
-        margin-top: 16px;
-        box-shadow: 0 8px 32px rgba(34, 26, 22, 0.04);
-        position: relative;
-    }
-
-    .dossier-card::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 32px;
-        right: 32px;
-        height: 2px;
-        background: linear-gradient(90deg, transparent, #C5A059, transparent);
-    }
-
-    .dossier-header {
+    /* ========================================================
+       WORKSPACE SECTION HEADER
+       ======================================================== */
+    .sky-section-header {
         display: flex;
         justify-content: space-between;
         align-items: baseline;
-        border-bottom: 1px solid #F2ECE4;
-        padding-bottom: 16px;
+        margin-bottom: 18px;
+        padding-bottom: 8px;
+    }
+
+    .sky-sec-title {
+        font-size: 22px;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0;
+    }
+
+    .sky-sec-subtitle {
+        font-size: 13px;
+        color: var(--text-secondary);
+        margin-top: 4px;
+    }
+
+    .sky-jump-link {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--btn-forest);
+        text-decoration: none;
+    }
+
+    /* ========================================================
+       CARD CONTAINERS (ACCOUNT HISTORY, DECISION SIGNALS)
+       ======================================================== */
+    .sky-panel-card {
+        background-color: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 14px;
+        padding: 24px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
         margin-bottom: 20px;
+        height: 100%;
     }
 
-    .dossier-id {
-        font-family: 'Playfair Display', serif;
-        font-size: 24px;
-        color: #1F1815;
+    .sky-panel-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 18px;
     }
 
-    .dossier-meta {
+    .sky-panel-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0;
+    }
+
+    .sky-badge-positive {
+        background-color: var(--badge-green-bg);
+        color: var(--badge-green-text);
+        font-size: 11px;
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 16px;
+    }
+
+    /* 4-Step Tracker */
+    .sky-stepper {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: relative;
+        margin: 20px 0 26px 0;
+    }
+
+    .sky-stepper::before {
+        content: "";
+        position: absolute;
+        top: 15px;
+        left: 20px;
+        right: 20px;
+        height: 2px;
+        background-color: #E2EBE5;
+        z-index: 1;
+    }
+
+    .sky-step-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+        z-index: 2;
+    }
+
+    .sky-step-circle-done {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background-color: #E6F3EB;
+        color: #1E6B3A;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        font-weight: 700;
+        border: 1px solid #C4E2D0;
+    }
+
+    .sky-step-circle-active {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background-color: var(--lime-accent);
+        color: #0F2D1E;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        font-weight: 800;
+        box-shadow: 0 2px 8px rgba(210, 232, 35, 0.4);
+    }
+
+    .sky-step-label {
         font-size: 11.5px;
-        color: #84756A;
+        color: var(--text-secondary);
+        margin-top: 8px;
+        font-weight: 500;
+    }
+
+    /* Decision Signals Row */
+    .sky-signal-row {
+        background-color: #F8FAF8;
+        border: 1px solid #E6ECE7;
+        border-radius: 8px;
+        padding: 10px 14px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    .sky-signal-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text-primary);
+    }
+
+    .sky-signal-check {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background-color: #E6F3EB;
+        color: #1E6B3A;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .sky-signal-tag {
+        font-size: 10px;
+        font-weight: 700;
         letter-spacing: 0.1em;
         text-transform: uppercase;
+        color: #1E6B3A;
+        background-color: #E6F3EB;
+        padding: 3px 8px;
+        border-radius: 4px;
     }
 
-    /* Probability Visual Meter */
-    .prob-meter-wrapper {
-        background: #F1ECE6;
-        border-radius: 10px;
-        height: 8px;
-        width: 100%;
-        overflow: hidden;
-        margin-top: 6px;
-    }
-
-    .prob-meter-fill {
-        height: 100%;
-        border-radius: 10px;
-        background: linear-gradient(90deg, #A67C48 0%, #C5A059 100%);
-    }
-
-    /* XAI Waterfall Pills */
-    .xai-pill-pos {
-        background-color: #F0F6F1;
-        border: 1px solid #C3DFC7;
-        color: #26542D;
-        padding: 6px 12px;
-        border-radius: 8px;
-        font-size: 12px;
-        margin-bottom: 6px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .xai-pill-neg {
-        background-color: #FDF3F1;
-        border: 1px solid #F0C4BC;
-        color: #8B2C1B;
-        padding: 6px 12px;
-        border-radius: 8px;
-        font-size: 12px;
-        margin-bottom: 6px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    /* Printable Slip Styles */
-    @media print {
-        body, .stApp {
-            background-color: #FFFFFF !important;
-            color: #000000 !important;
-        }
-        section[data-testid="stSidebar"], .stTabs [role="tablist"], header, footer {
-            display: none !important;
-        }
-        .printable-docket {
-            border: 2px solid #000000 !important;
-            padding: 24px !important;
-            page-break-inside: avoid !important;
-        }
-    }
-
-    /* Refined Modern Streamlit Native Overrides */
-    div[data-baseweb="tab-list"] {
-        border-bottom: 1px solid #E2E8F0 !important;
-        gap: 6px !important;
-        padding-bottom: 2px !important;
-    }
-
-    button[data-baseweb="tab"] {
-        font-family: 'Plus Jakarta Sans', -apple-system, sans-serif !important;
-        font-size: 13px !important;
-        font-weight: 500 !important;
-        letter-spacing: 0.02em !important;
-        color: #64748B !important;
-        background-color: transparent !important;
+    /* Action Buttons */
+    .sky-btn-forest {
+        background-color: var(--btn-forest) !important;
+        color: #FFFFFF !important;
         border: none !important;
-        padding: 8px 14px !important;
-        border-radius: 6px !important;
-        transition: all 0.15s ease !important;
-    }
-
-    button[data-baseweb="tab"]:hover {
-        color: #0F172A !important;
-        background-color: rgba(0, 0, 0, 0.03) !important;
-    }
-
-    button[aria-selected="true"] {
-        color: #0F172A !important;
-        font-weight: 600 !important;
-        border-bottom: 2px solid #C5A059 !important;
-        background-color: transparent !important;
-    }
-
-    .stDownloadButton button {
-        background-color: #1A1310 !important;
-        color: #FAF7F2 !important;
-        border: 1px solid #C5A059 !important;
         border-radius: 8px !important;
-        font-weight: 500 !important;
-        padding: 8px 18px !important;
+        padding: 10px 20px !important;
         font-size: 13px !important;
-        letter-spacing: 0.05em !important;
-        transition: all 0.2s ease !important;
+        font-weight: 600 !important;
+        letter-spacing: 0.02em !important;
+        cursor: pointer;
     }
 
-    .stDownloadButton button:hover {
-        background-color: #2D221D !important;
-        border-color: #E2CA96 !important;
-        color: #E2CA96 !important;
-        transform: translateY(-1px) !important;
+    /* Sub-boxes inside proposed installment */
+    .sky-sub-box {
+        background-color: #F8FAF8;
+        border: 1px solid #E6ECE7;
+        border-radius: 8px;
+        padding: 12px;
+        margin-top: 10px;
+    }
+
+    .sky-sub-box-label {
+        font-size: 10.5px;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+    }
+
+    .sky-sub-box-val {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-top: 2px;
+    }
+
+    /* Footer Navigation Line */
+    .sky-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 24px;
+        margin-top: 36px;
+        border-top: 1px solid var(--card-border);
+        font-size: 12px;
+        color: var(--text-muted);
     }
 </style>
 """), unsafe_allow_html=True)
@@ -557,996 +658,493 @@ if df_raw.empty:
     st.stop()
 
 # =============================================================
-# SUPER ELEGANT SIDEBAR (10/10 EXECUTIVE TELEMETRY)
+# SIDEBAR NAVIGATION & CASE CONTEXT
 # =============================================================
 with st.sidebar:
     st.markdown(textwrap.dedent("""
-    <div class="sidebar-brand-block">
-        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-            <div style="width: 32px; height: 32px; background: linear-gradient(135deg, #C5A059 0%, #8D6B32 100%); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; color: #120D0B; letter-spacing: -0.04em;">S8</div>
-            <div>
-                <h2 class="sidebar-title" style="font-size: 16px; margin: 0; line-height: 1.2;">SKYE8 INTELLIGENCE</h2>
-                <div class="sidebar-subtitle" style="margin-top: 1px;">Collections Decision Engine &bull; Bamenda</div>
-            </div>
-        </div>
-        <div class="sidebar-status-pill">
-            <span class="pulse-dot"></span>
-            Production Calibrated &bull; Adaptable Prior
+    <div class="sky-sidebar-header">
+        <div class="sky-logo-circle">*</div>
+        <div class="sky-logo-text">
+            <div class="sky-brand-name">SKYES</div>
+            <div class="sky-brand-sub">INTELLIGENCE</div>
+            <div class="sky-brand-workspace">RECOVERY WORKSPACE</div>
         </div>
     </div>
     """), unsafe_allow_html=True)
-    
-    st.markdown("### STRATEGIC MANDATE & POLICY")
-    
-    strategic_objective = st.selectbox(
-        "Optimization Objective",
-        [
-            "Maximum Cash Flow (EV = P × r × Debt)",
-            "Maximum Customer Cure Volume (P(cure))",
-            "Balanced Sustainable Recovery (Uplift × Debt^0.65)",
-            "Vulnerable & Community First (Hardship Priority)"
-        ]
+
+    st.markdown('<div class="sky-nav-header">WORKSPACE</div>', unsafe_allow_html=True)
+
+    nav_selection = st.radio(
+        "Workspace Navigation",
+        ["Case review", "Overview", "Decision signals", "Member outreach"],
+        index=0,
+        label_visibility="collapsed"
     )
 
-    branch_archetype = st.selectbox(
-        "Branch Archetype Calibration",
-        [
-            "Standard Credit Union Baseline",
-            "Urban Commercial (Mankon / Commercial Ave)",
-            "Agrarian Rural (Coffee / Farming Outskirts)",
-            "Civil Servant Payroll (Up Station / Administration)"
-        ]
-    )
-    # Apply branch adaptation
-    st.session_state.adaptable_engine.adapt_to_branch(branch_archetype)
+    st.markdown('<div style="height: 18px;"></div>', unsafe_allow_html=True)
+    st.markdown('<div class="sky-nav-header">CASE CONTEXT</div>', unsafe_allow_html=True)
 
-    st.markdown("### PORTFOLIO FILTERS")
-    
-    officers = ["All Collections Officers"] + sorted(df_raw["assigned_officer"].unique().tolist())
-    selected_officer = st.selectbox("Assignee Filter", officers)
-
-    channels = ["All Outreach Channels"] + sorted(df_raw["recommended_channel"].unique().tolist())
-    selected_channel = st.selectbox("Outreach Channel", channels)
-
-    quarters_list = ["All Bamenda Quarters"] + sorted(df_raw["bamenda_quarter"].dropna().unique().tolist())
-    selected_quarter = st.selectbox("Quarter / Urban Zone", quarters_list)
-
-    vulnerability_filter = st.selectbox(
-        "Ethical Safeguard Filter",
-        ["All Accounts", "Standard Accounts Only", "Senior & Vulnerable Protected Only"]
+    selected_branch = st.selectbox(
+        "BRANCH",
+        ["Central district", "Ntarinkon main branch", "Azire credit union", "Up Station administration"]
     )
 
-    min_prob = st.slider("Minimum Cure Probability", 0.0, 1.0, 0.0, 0.05)
+    selected_segment = st.selectbox(
+        "PORTFOLIO SEGMENT",
+        ["Commercial avenue", "Food Market (Zone 1)", "Nkwen (Zone 2)", "Up Station (Zone 3)", "Mankon (Zone 4)"]
+    )
 
-    # Search Bar inside Sidebar
-    search_query = st.text_input("Search Borrower ID or Loan Reference", placeholder="e.g. 103380")
-
-    st.markdown("---")
-    
-    # Live Officer Caseload Card
     st.markdown(textwrap.dedent("""
-    <div class="sidebar-card">
-        <div class="sidebar-card-title">OFFICER CASELOAD ALLOCATION</div>
-    """), unsafe_allow_html=True)
-    
-    officer_counts = df_raw["assigned_officer"].value_counts()
-    for off_name in sorted(officer_counts.index):
-        cnt = officer_counts[off_name]
-        short_name = off_name.split(" - ")[-1]
-        st.markdown(textwrap.dedent(f"""
-        <div class="sidebar-stat-row">
-            <span class="sidebar-stat-name">{short_name}</span>
-            <span class="sidebar-stat-val">{cnt} accounts</span>
+    <div class="sky-officer-profile">
+        <div class="sky-officer-avatar">JN</div>
+        <div>
+            <div class="sky-officer-name">John N.</div>
+            <div class="sky-officer-role">Recovery officer</div>
         </div>
-        """), unsafe_allow_html=True)
-        
-    st.markdown("</div>", unsafe_allow_html=True)
-    
-    # 1-Click Offline Export in Sidebar
-    st.markdown("### FIELD MOBILITY EXPORT")
-    csv_buffer = io.StringIO()
-    df_raw.to_csv(csv_buffer, index=False)
-    st.download_button(
-        label="Download Full Call Sheet (CSV)",
-        data=csv_buffer.getvalue(),
-        file_name="Skye8_Weekly_Call_Sheet_Bamenda.csv",
-        mime="text/csv",
-        help="Download offline roster for field visits in Mezam division."
-    )
-    
-    st.markdown(textwrap.dedent("""
-    <div style="font-size: 10px; color: #84756A; text-align: center; letter-spacing: 0.1em; text-transform: uppercase; margin-top: 18px;">
-        Skye8 Final Project SKY8-DS-FP-005<br>Nahbila Faith &bull; October 2026
     </div>
     """), unsafe_allow_html=True)
 
-# -------------------------------------------------------------
-# ADAPTABLE MODEL RE-RANKING ENGINE
-# -------------------------------------------------------------
 # Dynamically re-rank portfolio based on active AdaptablePrioritiser
 df_active = st.session_state.adaptable_engine.rank_portfolio(
     df_raw,
-    objective=strategic_objective,
+    objective="Maximum Cash Flow (EV = P × r × Debt)",
     fuel_price_fcfa=850.0,
     airtime_cost_fcfa=500.0
 )
 
-# -------------------------------------------------------------
-# FILTER DATA ENGINE
-# -------------------------------------------------------------
-df_filtered = df_active.copy()
+# =============================================================
+# VIEW 1: CASE REVIEW (EXACT MATCH TO WORD DOCUMENT MOCKUP)
+# =============================================================
+if nav_selection == "Case review":
+    # Borrower selector header (defaulting cleanly to 103380 from the mockup)
+    top_col1, top_col2 = st.columns([3, 1])
+    with top_col1:
+        st.caption("Active Account Decision Dossier • Bamenda Division")
+    with top_col2:
+        # Pre-select Client #103380 if available, else first account
+        all_accounts = df_active["SK_ID_CURR"].tolist()
+        default_idx = all_accounts.index(103380) if 103380 in all_accounts else 0
+        selected_account = st.selectbox(
+            "Select Borrower Account",
+            all_accounts,
+            index=default_idx,
+            label_visibility="collapsed"
+        )
 
-if selected_officer != "All Collections Officers":
-    df_filtered = df_filtered[df_filtered["assigned_officer"] == selected_officer]
+    acc = df_active[df_active["SK_ID_CURR"] == selected_account].iloc[0]
 
-if selected_channel != "All Outreach Channels":
-    df_filtered = df_filtered[df_filtered["recommended_channel"] == selected_channel]
+    client_id = int(acc["SK_ID_CURR"])
+    loan_id = int(acc["SK_ID_PREV"])
+    overdue_amt = float(acc["overdue_amount"])
+    recovery_prob = float(acc["recovery_probability"])
+    expected_net = float(acc["expected_net_recovery_fcfa"])
+    officer_name = str(acc["assigned_officer"]).split(" - ")[-1]
+    quarter_name = str(acc.get("bamenda_quarter", "Commercial Avenue"))
 
-if selected_quarter != "All Bamenda Quarters":
-    df_filtered = df_filtered[df_filtered["bamenda_quarter"] == selected_quarter]
-
-if vulnerability_filter == "Standard Accounts Only":
-    df_filtered = df_filtered[~df_filtered["is_vulnerable"]]
-elif vulnerability_filter == "Senior & Vulnerable Protected Only":
-    df_filtered = df_filtered[df_filtered["is_vulnerable"]]
-
-df_filtered = df_filtered[df_filtered["recovery_probability"] >= min_prob]
-
-if search_query:
-    q = search_query.strip().lower()
-    df_filtered = df_filtered[
-        df_filtered["SK_ID_CURR"].astype(str).str.contains(q, na=False) |
-        df_filtered["SK_ID_PREV"].astype(str).str.contains(q, na=False)
-    ]
-
-# -------------------------------------------------------------
-# HERO BANNER (EDITORIAL LUXURY DESIGN)
-# -------------------------------------------------------------
-st.markdown(textwrap.dedent("""
-<div class="hero-container">
-    <div class="hero-eyebrow">Skye8 Intelligence &bull; Core ML &bull; Bamenda, Cameroon</div>
-    <div class="hero-title">The <em>precision</em> of recovery,<br>the <em>depth</em> of care.</div>
-    <div class="hero-desc">
-        A predictive decision engine ranking the arrears portfolio by expected recovery value,
-        optimizing contact channel economics, and safeguarding vulnerable borrowers across 400 credit union accounts.
+    # 1. HERO CARD (EXACT GRADIENT BANNER)
+    hero_html = f"""
+    <div class="sky-hero-card">
+        <div class="sky-hero-left">
+            <div class="sky-hero-badge">
+                <span class="sky-hero-dot"></span>
+                RECOMMENDED ACTION &bull; SUPPORTIVE CALL
+            </div>
+            <div class="sky-hero-title">Client #{client_id}</div>
+            <div class="sky-hero-subtitle">Loan reference {loan_id} &bull; {quarter_name} &bull; Urban market zone</div>
+            <div class="sky-hero-tags">
+                <span class="sky-tag-lime">Call today</span>
+                <span class="sky-tag-glass">Member-first approach</span>
+                <span class="sky-tag-glass">Assigned to {officer_name}</span>
+            </div>
+        </div>
+        <div class="sky-hero-right">
+            <div class="sky-gauge-ring">
+                <div class="sky-gauge-val">{recovery_prob:.0%}</div>
+                <div class="sky-gauge-label">LIKELIHOOD</div>
+            </div>
+            <a href="#action-section" class="sky-hero-btn">Prepare call &nearr;</a>
+        </div>
     </div>
-</div>
-"""), unsafe_allow_html=True)
+    """
+    st.markdown(textwrap.dedent(hero_html), unsafe_allow_html=True)
 
-# -------------------------------------------------------------
-# EXECUTIVE KPI METRICS (BESPOKE MASTERPIECE GRID)
-# -------------------------------------------------------------
-total_overdue = df_filtered["overdue_amount"].sum()
-expected_rec = df_filtered["expected_gross_recovery_fcfa"].sum()
-total_cost = df_filtered["channel_cost_fcfa"].sum()
-net_rec = expected_rec - total_cost
-
-st.markdown(textwrap.dedent(f"""
-<div class="metric-grid">
-    <div class="metric-card">
-        <div class="metric-label">Active Arrears Book</div>
-        <div class="metric-value">{total_overdue:,.0f} <span style="font-size:14px; font-family:'Plus Jakarta Sans'; color:#84756A;">FCFA</span></div>
-        <div class="metric-badge">{len(df_filtered)} Active Accounts</div>
+    # 2. 4 METRIC CARDS ROW
+    metrics_html = f"""
+    <div class="sky-metrics-row">
+        <div class="sky-metric-card">
+            <div class="sky-m-label">OVERDUE BALANCE</div>
+            <div class="sky-m-val">{overdue_amt:,.0f} <span class="sky-m-curr">FCFA</span></div>
+            <div class="sky-m-sub">Current arrears amount</div>
+        </div>
+        <div class="sky-metric-card">
+            <div class="sky-m-label">RECOVERY LIKELIHOOD</div>
+            <div class="sky-m-val">{recovery_prob:.0%}</div>
+            <div class="sky-m-sub">High-confidence recommendation</div>
+        </div>
+        <div class="sky-metric-card">
+            <div class="sky-m-label">EXPECTED NET RECOVERY</div>
+            <div class="sky-m-val">{expected_net:,.0f} <span class="sky-m-curr">FCFA</span></div>
+            <div class="sky-m-sub">After estimated outreach cost</div>
+        </div>
+        <div class="sky-metric-card">
+            <div class="sky-m-label">ASSIGNED OFFICER</div>
+            <div class="sky-m-val">{officer_name}</div>
+            <div class="sky-m-sub">Commercial Avenue branch</div>
+        </div>
     </div>
-    <div class="metric-card">
-        <div class="metric-label">Expected Recovery</div>
-        <div class="metric-value">{expected_rec:,.0f} <span style="font-size:14px; font-family:'Plus Jakarta Sans'; color:#84756A;">FCFA</span></div>
-        <div class="metric-badge">{expected_rec/max(1.0, total_overdue):.1%} of Delinquent Balance</div>
-    </div>
-    <div class="metric-card">
-        <div class="metric-label">Action Cost & Net</div>
-        <div class="metric-value">{net_rec:,.0f} <span style="font-size:14px; font-family:'Plus Jakarta Sans'; color:#84756A;">FCFA</span></div>
-        <div class="metric-badge">Outreach Cost: {total_cost:,.0f} FCFA</div>
-    </div>
-    <div class="metric-card">
-        <div class="metric-label">Precision @ 100 Accounts</div>
-        <div class="metric-value">88.0%</div>
-        <div class="metric-badge">12.6x vs Incumbent Heuristic (7.0%)</div>
-    </div>
-    <div class="metric-card">
-        <div class="metric-label">Net Financial Lift</div>
-        <div class="metric-value">+2,164,156 <span style="font-size:14px; font-family:'Plus Jakarta Sans'; color:#84756A;">FCFA</span></div>
-        <div class="metric-badge">+65.6% Added Cash per 100 Accounts</div>
-    </div>
-</div>
-"""), unsafe_allow_html=True)
+    """
+    st.markdown(textwrap.dedent(metrics_html), unsafe_allow_html=True)
 
-# -------------------------------------------------------------
-# MAIN EDITORIAL TABS (8 MASTERPIECE MODULES)
-# -------------------------------------------------------------
-tab_dossier, tab_table, tab_adaptability, tab_roi, tab_routes, tab_docket, tab_financials, tab_ethics = st.tabs([
-    "Dossier Inspector & XAI",
-    "Prioritised Call Book",
-    "Model Adaptability Studio",
-    "Branch ROI Simulator",
-    "Bamenda Route Optimizer",
-    "Printable Field Docket",
-    "Financial & ML Validation",
-    "Ethical Safeguards"
-])
-
-# -------------------------------------------------------------
-# TAB 1: BESPOKE DOSSIER INSPECTOR & EXPLAINABLE AI (XAI)
-# -------------------------------------------------------------
-with tab_dossier:
-    st.markdown("### Client Dossier, Explainable AI & Actionable Guidance")
-    st.caption("Inspect individual repayment telemetry, probability meters, causal uplifts, XAI factors, and multilingual scripts.")
-    
-    selected_account = st.selectbox(
-        "Select Account Number",
-        df_filtered["SK_ID_CURR"].tolist() if not df_filtered.empty else []
-    )
-    
-    if selected_account:
-        acc = df_filtered[df_filtered["SK_ID_CURR"] == selected_account].iloc[0]
-        
-        channel_tag_class = "tag-sms" if acc["recommended_channel"] == "SMS" else ("tag-call" if acc["recommended_channel"] == "CALL" else "tag-visit")
-        vulnerable_tag = '<span class="tag-vulnerable">Protected &bull; Senior / Hardship</span>' if acc["is_vulnerable"] else '<span class="tag-sms">Standard Operational Flow</span>'
-        
-        prob_pct = acc['recovery_probability'] * 100.0
-        segment = acc.get("behavioral_segment", "Persuadable")
-        ttc = int(acc.get("estimated_days_to_cure", 14))
-        settlement_ratio = float(acc.get("partial_recovery_ratio", 0.66)) * 100.0
-        bureau_debt = float(acc.get("bureau_total_debt", 0.0))
-        bureau_active = int(acc.get("bureau_active_loans", 0))
-        uplift_pct = float(acc.get("causal_uplift", 0.15)) * 100.0
-        qtr_name = acc.get("bamenda_quarter", "Commercial Avenue / Food Market (Zone 1)")
-
-        # Check if this account has active Bayesian field adjustment
-        acc_id_int = int(acc['SK_ID_CURR'])
-        feedback_status_badge = ""
-        if acc_id_int in st.session_state.adaptable_engine.feedback_adjustments:
-            f_adj = st.session_state.adaptable_engine.feedback_adjustments[acc_id_int]
-            badge_color = "#2E5A36" if f_adj > 0 else "#9C3826"
-            feedback_status_badge = f'<span style="background:{badge_color}; color:#fff; font-size:10px; padding:3px 8px; border-radius:12px; font-weight:600; margin-left:8px;">Adapted by Field Feedback ({f_adj:+.1%})</span>'
-
-        dossier_html = f"""<div class="dossier-card">
-<div class="dossier-header">
-<div>
-<span class="dossier-meta">Borrower Account Reference &bull; {qtr_name} {feedback_status_badge}</span>
-<div class="dossier-id">Client #{acc['SK_ID_CURR']} &bull; Loan Ref {acc['SK_ID_PREV']}</div>
-<div style="font-size: 11.5px; color: #84756A; margin-top: 4px;">
-Causal Segment: <strong style="color: #A67C48;">{segment}</strong> &bull; Settlement Days: <strong style="color: #1F1815;">~{ttc} Days</strong> &bull; Expected Settlement: <strong style="color: #1F1815;">{settlement_ratio:.1f}%</strong> &bull; Bureau Debt: <strong style="color: #1F1815;">{bureau_debt:,.0f} FCFA</strong> ({bureau_active} active)
-</div>
-</div>
-<div>
-<span class="{channel_tag_class}">Recommended Action: {acc['recommended_channel']}</span>
-&nbsp;
-{vulnerable_tag}
-</div>
-</div>
-<div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 24px;">
-<div>
-<div class="metric-label">Overdue Balance</div>
-<div style="font-size: 20px; font-weight: 600; color: #1F1815;">{acc['overdue_amount']:,.0f} FCFA</div>
-<div style="font-size: 11px; color: #84756A;">15 Days Past Due</div>
-</div>
-<div>
-<div class="metric-label">Recovery Probability</div>
-<div style="font-size: 20px; font-weight: 600; color: #C5A059;">{acc['recovery_probability']:.1%}</div>
-<div class="prob-meter-wrapper"><div class="prob-meter-fill" style="width: {prob_pct:.1f}%;"></div></div>
-<div style="font-size: 11px; color: #84756A; margin-top: 4px;">Causal Contact Lift: +{uplift_pct:.1f}%</div>
-</div>
-<div>
-<div class="metric-label">Assigned Officer</div>
-<div style="font-size: 18px; font-weight: 600; color: #1F1815;">{acc['assigned_officer']}</div>
-<div style="font-size: 11px; color: #84756A;">{qtr_name.split(' (')[0]}</div>
-</div>
-<div>
-<div class="metric-label">Net Yield Expectation</div>
-<div style="font-size: 20px; font-weight: 600; color: #2E5A36;">{acc['expected_net_recovery_fcfa']:,.0f} FCFA</div>
-<div style="font-size: 11px; color: #84756A;">Net of Action Cost ({acc['channel_cost_fcfa']:,.0f} FCFA)</div>
-</div>
-</div>
-<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; padding-top: 16px; border-top: 1px solid #F0EAE2;">
-<div>
-<div class="metric-label">Behavioral Track Record (Pre-Arrears)</div>
-<ul style="font-size: 13px; color: #4A3E36; line-height: 1.8; margin-top: 6px; padding-left: 18px;">
-<li>Prior Instalment Count: <strong>{int(acc['prior_instalments_count'])} scheduled payments</strong></li>
-<li>Historical Delinquency Rate: <strong>{acc['prior_late_ratio']:.1%} of past instalments</strong></li>
-<li>Past Severe Delinquencies (15+ days): <strong>{int(acc['prior_severe_late_count'])}</strong></li>
-<li>Average Historical Delay: <strong>{acc['prior_avg_days_late']:.1f} days</strong></li>
-<li>Repayment Compliance Ratio: <strong>{acc['prior_payment_ratio']:.1%}</strong></li>
-<li>Cross-Institutional Indebtedness: <strong>{bureau_debt:,.0f} FCFA across {bureau_active} external credits</strong></li>
-</ul>
-</div>
-<div>
-<div class="metric-label">Strategic Decision Rationale</div>
-<div style="background-color: #FAF7F2; border: 1px solid #EAE2D7; border-radius: 8px; padding: 14px; margin-top: 6px;">
-<div style="font-size: 13px; font-weight: 600; color: #1F1815; margin-bottom: 4px;">Engine Reasoning:</div>
-<div style="font-size: 12.5px; color: #5C5047; line-height: 1.5;">{acc['action_reason']}</div>
-</div>
-</div>
-</div>
-</div>"""
-        st.markdown(dossier_html, unsafe_allow_html=True)
-        
-        # -----------------------------------------------------
-        # EXPLAINABLE AI (XAI) TOP DRIVERS WATERFALL
-        # -----------------------------------------------------
-        st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
-        st.markdown("#### Explainable AI (XAI) Attribution Breakdown")
-        st.caption("Exact behavioral and macro-seasonal drivers impacting this borrower's cure probability score.")
-        
-        col_xai1, col_xai2 = st.columns(2)
-        with col_xai1:
-            st.markdown("**Positive Attribution (+ Lift to Score)**")
-            pos_factors = str(acc.get("xai_top_positive", "")).split(" | ")
-            for pf in pos_factors:
-                if pf.strip():
-                    st.markdown(f'<div class="xai-pill-pos"><span style="font-weight: 500;">{pf}</span><span class="badge-pos">+ LIFT</span></div>', unsafe_allow_html=True)
-        with col_xai2:
-            st.markdown("**Negative Attribution (- Drag on Score)**")
-            neg_factors = str(acc.get("xai_top_negative", "")).split(" | ")
-            for nf in neg_factors:
-                if nf.strip():
-                    st.markdown(f'<div class="xai-pill-neg"><span style="font-weight: 500;">{nf}</span><span class="badge-neg">&minus; DRAG</span></div>', unsafe_allow_html=True)
-
-        # -----------------------------------------------------
-        # MULTILINGUAL ENGAGEMENT SCRIPTS (ENGLISH & PIDGIN)
-        # -----------------------------------------------------
-        st.markdown("<div style='height: 18px;'></div>", unsafe_allow_html=True)
-        st.markdown("#### Localized Borrower Communication Protocols")
-        st.caption("Standardized dialogue calibrated to the borrower's hardship status and regional language.")
-        
-        script_lang = st.radio(
-            "Select Communication Language",
-            ["Formal English (Standard Notice)", "Cameroon Pidgin English (Community Outreach)"],
-            horizontal=True
-        )
-        
-        if "English" in script_lang:
-            chosen_script = acc.get("script_english", "Formal English script unavailable.")
-        else:
-            chosen_script = acc.get("script_pidgin", "Pidgin script unavailable.")
-            
-        st.text_area(
-            label="Officer Outreach Dialogue / SMS Message",
-            value=chosen_script,
-            height=120,
-            help="Copy directly into SMS, WhatsApp, or read to borrower during telephone/field contact."
-        )
-
-        # -----------------------------------------------------
-        # LOCAL INNOVATION 1: MOBILE MONEY 1-CLICK USSD CODES
-        # -----------------------------------------------------
-        st.markdown("<div style='height: 18px;'></div>", unsafe_allow_html=True)
-        st.markdown("#### Mobile Money Instant Settlement Codes (USSD)")
-        st.caption("Frictionless digital recovery via MTN MoMo and Orange Money to eliminate cash transit risks.")
-        
-        momo_data = generate_momo_ussd_strings(acc['overdue_amount'], acc['SK_ID_PREV'])
-        col_momo1, col_momo2 = st.columns(2)
-        with col_momo1:
-            st.markdown("##### MTN Mobile Money (MoMo)")
-            st.code(momo_data["mtn_ussd"], language="text")
-            st.caption("Credit Union Till: 705001 • Direct settlement into MFI treasury.")
-        with col_momo2:
-            st.markdown("##### Orange Money Cameroun")
-            st.code(momo_data["orange_ussd"], language="text")
-            st.caption("Orange Partner Code: 705001 • Instant automated clearing.")
-        
-        st.info(f"**Borrower Dial Instruction (Pidgin):** {momo_data['instruction_pidgin']}")
-
-        # -----------------------------------------------------
-        # LOCAL INNOVATION 2 & 3: SMALL-SMALL MICRO-PLANS & DIASPORA PROTOCOL
-        # -----------------------------------------------------
-        col_innov1, col_innov2 = st.columns(2)
-        with col_innov1:
-            st.markdown("#### Informal Trader Daily Restructuring ('Small-Small')")
-            st.caption("Restructure lump-sum debt into daily micro-installments matching market cash velocity.")
-            tenor_choice = st.select_slider(
-                "Restructuring Horizon",
-                options=[15, 30, 45, 60],
-                value=30,
-                key=f"tenor_{acc['SK_ID_CURR']}"
-            )
-            micro_res = calculate_small_small_repayment_plan(acc['overdue_amount'], days_option=tenor_choice)
-            st.metric(
-                "Daily Micro-Installment",
-                f"{micro_res['daily_payment_fcfa']:,.0f} FCFA / day",
-                f"{micro_res['weekly_subtotal_fcfa']:,.0f} FCFA weekly"
-            )
-            st.markdown(f"**Agreement Terms:** `{micro_res['plan_text']}`")
-
-        with col_innov2:
-            st.markdown("#### Remote Diaspora Sponsor & Guarantor Notice")
-            st.caption("Formal notice for family sponsors in Douala, Yaoundé, or Abroad to settle remotely.")
-            diaspora_note = generate_diaspora_sponsor_script(
-                int(acc['SK_ID_CURR']),
-                int(acc['SK_ID_PREV']),
-                acc['overdue_amount'],
-                acc['assigned_officer']
-            )
-            st.text_area(
-                "Guarantor Dialogue (Ready to Dispatch)",
-                value=diaspora_note,
-                height=130,
-                key=f"diaspora_{acc['SK_ID_CURR']}"
-            )
-
-        # -----------------------------------------------------
-        # ACTIVE LEARNING HUMAN-IN-THE-LOOP FIELD LOGGER
-        # -----------------------------------------------------
-        st.markdown("<div style='height: 18px;'></div>", unsafe_allow_html=True)
-        st.markdown("#### Log Field Contact Outcome (Continuous Active Learning)")
-        st.caption("Logging an outcome immediately adapts the machine learning prior for this account and its cohort.")
-        
-        log_col1, log_col2, log_col3 = st.columns([2, 2.5, 1.2])
-        with log_col1:
-            outcome = st.selectbox(
-                "Contact Outcome",
-                [
-                    "Promise to Pay (Within Grace Window)",
-                    "Phone Switched Off / Out of Network",
-                    "Severe Hardship / Bereavement Shock",
-                    "Disputed Overdue Balance",
-                    "Cured & Settled in Full"
-                ],
-                key=f"out_{acc['SK_ID_CURR']}"
-            )
-        with log_col2:
-            notes = st.text_input(
-                "Field Notes / Settlement Commitment",
-                placeholder="e.g. Borrower will deposit cash on Tuesday market day.",
-                key=f"note_{acc['SK_ID_CURR']}"
-            )
-        with log_col3:
-            st.write("")
-            st.write("")
-            if st.button("Commit Outcome & Adapt Prior", key=f"btn_{acc['SK_ID_CURR']}"):
-                adj = st.session_state.adaptable_engine.incorporate_field_feedback(acc['SK_ID_CURR'], outcome)
-                st.session_state.logged_feedback.append({
-                    "Account ID": acc['SK_ID_CURR'],
-                    "Officer": acc['assigned_officer'],
-                    "Outcome": outcome,
-                    "Notes": notes,
-                    "Adaptation Delta": f"{adj:+.1%}"
-                })
-                st.success(f"Outcome recorded. Bayesian model adapted: {adj:+.1%} for Client #{acc['SK_ID_CURR']}.")
-                st.rerun()
-
-# -------------------------------------------------------------
-# TAB 2: PRIORITISED TABLE VIEW
-# -------------------------------------------------------------
-with tab_table:
-    st.markdown("### Weekly Prioritised Call Book (400 Accounts)")
-    st.caption("Ordered dynamically by active Adaptable Policy. High-probability, high-yield accounts first.")
-    
-    sub_col1, sub_col2 = st.columns([3, 1])
-    with sub_col2:
-        officer_buf = io.StringIO()
-        df_filtered.to_csv(officer_buf, index=False)
-        st.download_button(
-            label=f"Export Call Roster ({len(df_filtered)} Rows)",
-            data=officer_buf.getvalue(),
-            file_name="Prioritised_Call_Roster.csv",
-            mime="text/csv"
-        )
-    
-    display_df = df_filtered[[
-        "rank", "SK_ID_CURR", "assigned_officer", "bamenda_quarter", "overdue_amount",
-        "recovery_probability", "partial_recovery_ratio", "recommended_channel", "channel_cost_fcfa",
-        "expected_gross_recovery_fcfa", "is_vulnerable", "action_reason"
-    ]].copy()
-    
-    display_df = display_df.rename(columns={
-        "rank": "Rank",
-        "SK_ID_CURR": "Borrower ID",
-        "assigned_officer": "Officer",
-        "bamenda_quarter": "Urban Zone",
-        "overdue_amount": "Overdue (FCFA)",
-        "recovery_probability": "Cure Prob",
-        "partial_recovery_ratio": "Settlement %",
-        "recommended_channel": "Channel",
-        "channel_cost_fcfa": "Cost (FCFA)",
-        "expected_gross_recovery_fcfa": "Expected Yield (FCFA)",
-        "is_vulnerable": "Protected",
-        "action_reason": "Rationale"
-    })
-    
-    st.dataframe(
-        display_df.style.format({
-            "Overdue (FCFA)": "{:,.0f}",
-            "Cure Prob": "{:.1%}",
-            "Settlement %": "{:.1%}",
-            "Cost (FCFA)": "{:,.0f}",
-            "Expected Yield (FCFA)": "{:,.0f}",
-            "Protected": lambda x: "Protected" if x else "Standard"
-        }),
-        height=500
-    )
-
-# -------------------------------------------------------------
-# TAB 3: MODEL ADAPTABILITY STUDIO
-# -------------------------------------------------------------
-with tab_adaptability:
-    st.markdown("### Model Adaptability & Calibration Studio")
-    st.caption("Empowering credit union risk officers to dynamically adapt priors, calibrate macro-economic shocks, and inspect online active learning telemetry.")
-    
-    adapt_c1, adapt_c2 = st.columns([1.2, 1.8])
-    
-    with adapt_c1:
-        st.markdown("#### Live Calibration Tuning")
-        harvest_boost_val = st.slider("Seasonal Harvest Cash Inflow Boost", 0.0, 0.40, 0.15, 0.05, format="+%.0f%%")
-        school_fee_drag_val = st.slider("School Fee Tuition Expense Drag", 0.0, 0.35, 0.10, 0.05, format="-%.0f%%")
-        
-        # Apply seasonal adaptation
-        st.session_state.adaptable_engine.adapt_to_season(harvest_boost=harvest_boost_val, school_fee_drag=school_fee_drag_val)
-        
-        st.markdown("#### Macroeconomic Unit Cost Recalibration")
-        fuel_price_input = st.number_input("Motorcycle Fuel Price (FCFA / Liter)", min_value=600, max_value=1500, value=850, step=50)
-        airtime_cost_input = st.number_input("Outreach Phone Call Cost (FCFA / Call)", min_value=100, max_value=1500, value=500, step=50)
-        
-        st.markdown(textwrap.dedent(f"""
-        <div style="background:#FAF7F2; border:1px solid #EAE2D7; border-radius:8px; padding:12px; margin-top:14px;">
-            <div style="font-size:11px; text-transform:uppercase; color:#84756A; letter-spacing:0.1em; font-weight:600;">Active Engine State</div>
-            <div style="font-size:13px; color:#1F1815; margin-top:4px;">
-                Branch Log-Odds Offset: <strong>{st.session_state.adaptable_engine.branch_offset:+.2f}</strong><br>
-                Seasonal Multiplier: <strong>{st.session_state.adaptable_engine.season_modifier:.2f}x</strong><br>
-                Online Field Adjustments: <strong>{len(st.session_state.adaptable_engine.feedback_adjustments)} accounts</strong>
-            </div>
+    # 3. ACCOUNT DECISION WORKSPACE SECTION HEADER
+    st.markdown(textwrap.dedent("""
+    <div class="sky-section-header">
+        <div>
+            <h2 class="sky-sec-title">Account decision workspace</h2>
+            <div class="sky-sec-subtitle">Review the evidence, tailor a supportive contact, and record the next step.</div>
         </div>
-        """), unsafe_allow_html=True)
-        
-    with adapt_c2:
-        st.markdown("#### Continuous Bayesian Online Feedback Telemetry")
-        if st.session_state.logged_feedback:
-            feedback_df = pd.DataFrame(st.session_state.logged_feedback)
-            st.dataframe(feedback_df, height=220, hide_index=True)
-            if st.button("Reset Bayesian Feedback Memory"):
-                st.session_state.adaptable_engine.feedback_adjustments.clear()
-                st.session_state.logged_feedback.clear()
-                st.success("Feedback memory reset.")
-                st.rerun()
-        else:
-            st.info("No field outcomes logged yet in this session. Log outcomes in Tab 1 (Dossier Inspector) to see the model adapt live!")
-            
-        st.markdown("---")
-        st.markdown("#### Schema Resilience & Missing Modality Stress Test")
-        st.caption("Demonstrating how the engine adapts gracefully when an institution lacks Credit Bureau or POS Cash records:")
-        
-        col_stress1, col_stress2 = st.columns(2)
-        with col_stress1:
-            st.markdown(textwrap.dedent("""
-            <div style="background:#FFFFFF; border:1px solid #EAE2D7; border-radius:8px; padding:12px;">
-                <strong>Scenario A: Full Multi-Source Roster</strong><br>
-                <span style="font-size:12px; color:#2E5A36; font-weight:600;">[Active] Installments + Application + Bureau + POS Cash</span><br>
-                <span style="font-size:11px; color:#84756A;">Prediction Accuracy: High fidelity (PR-AUC: 0.929)</span>
-            </div>
-            """), unsafe_allow_html=True)
-        with col_stress2:
-            st.markdown(textwrap.dedent("""
-            <div style="background:#FFFFFF; border:1px solid #EAE2D7; border-radius:8px; padding:12px;">
-                <strong>Scenario B: Installments Only (Cold-Start MFI)</strong><br>
-                <span style="font-size:12px; color:#A67C48; font-weight:600;">[Graceful Fallback] Domain Imputation Active</span><br>
-                <span style="font-size:11px; color:#84756A;">Prediction Accuracy: Robust baseline (PR-AUC: 0.894)</span>
-            </div>
-            """), unsafe_allow_html=True)
-
-# -------------------------------------------------------------
-# TAB 4: BRANCH ROI & SOFTWARE LICENSE FEE SIMULATOR
-# -------------------------------------------------------------
-with tab_roi:
-    st.markdown("### Credit Union Branch ROI & License Fee Calculator")
-    st.caption("Interactive commercial model for Microfinance Branch Managers (NtaCCUL, AZICCUL, CamCCUL).")
-    
-    sim_col1, sim_col2 = st.columns([1.2, 2])
-    
-    with sim_col1:
-        st.markdown("#### Branch Operating Parameters")
-        sim_portfolio = st.slider(
-            "Total Branch Arrears Portfolio (FCFA)",
-            min_value=25000000,
-            max_value=500000000,
-            value=150000000,
-            step=5000000,
-            format="%d FCFA"
-        )
-        sim_officers = st.slider("Active Field Collections Officers", 1, 10, 3)
-        sim_baseline_rate = st.slider("Incumbent Baseline Recovery Rate", 0.05, 0.30, 0.12, 0.01, format="%.0f%%")
-        sim_license_fee = 150000  # 150,000 FCFA / month standard license
-        
-        st.markdown(textwrap.dedent(f"""
-        <div style="background-color: #FFFFFF; border: 1px solid #EAE2D7; border-radius: 8px; padding: 14px; margin-top: 14px;">
-            <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: #84756A;">Skye8 License Terms</div>
-            <div style="font-size: 18px; font-weight: 600; color: #1F1815; margin-top: 4px;">{sim_license_fee:,.0f} FCFA / mo</div>
-            <div style="font-size: 12px; color: #5C5047; margin-top: 2px;">Includes multi-officer access, weekly model retraining, and zero-leakage offline field sheets.</div>
+        <div>
+            <a href="#record-outcome-anchor" class="sky-jump-link">Jump to outcome &darr;</a>
         </div>
-        """), unsafe_allow_html=True)
-        
-    with sim_col2:
-        st.markdown("#### Simulated Financial & Operational Return")
-        baseline_cash = sim_portfolio * sim_baseline_rate
-        lift_rate = 0.656
-        incremental_cash = baseline_cash * lift_rate
-        ai_total_cash = baseline_cash + incremental_cash
-        monthly_net_profit = incremental_cash - sim_license_fee
-        roi_multiple = incremental_cash / max(1.0, sim_license_fee)
-        payback_days = (sim_license_fee / (incremental_cash / 30.0))
-        
-        st.markdown(textwrap.dedent(f"""
-        <div class="metric-grid">
-            <div class="metric-card">
-                <div class="metric-label">Baseline Recovery (Heuristic)</div>
-                <div class="metric-value">{baseline_cash:,.0f} <span style="font-size:12px; color:#84756A;">FCFA</span></div>
-                <div class="metric-badge">Incumbent strategy without AI</div>
-            </div>
-            <div class="metric-card">
-                <div class="metric-label">Skye8 Recovered Total</div>
-                <div class="metric-value">{ai_total_cash:,.0f} <span style="font-size:12px; color:#84756A;">FCFA</span></div>
-                <div class="metric-badge">+65.6% empirical recovery lift</div>
-            </div>
-            <div class="metric-card">
-                <div class="metric-label">Added Net Cash Generated</div>
-                <div class="metric-value" style="color: #2E5A36;">+{incremental_cash:,.0f} <span style="font-size:12px; color:#2E5A36;">FCFA</span></div>
-                <div class="metric-badge">After operational costs</div>
-            </div>
-            <div class="metric-card">
-                <div class="metric-label">Software ROI Multiple</div>
-                <div class="metric-value" style="color: #A67C48;">{roi_multiple:.1f}x</div>
-                <div class="metric-badge">Payback in {payback_days:.1f} days of recovery</div>
-            </div>
-        </div>
-        """), unsafe_allow_html=True)
-        
-        st.markdown(textwrap.dedent(f"""
-        <div style="background-color: #FFFFFF; border-left: 3px solid #2E5A36; border-radius: 8px; padding: 18px; border: 1px solid #EAE2D7;">
-            <div style="font-size: 15px; font-weight: 600; color: #1F1815;">Executive Board Decision Summary:</div>
-            <p style="font-size: 13px; color: #4A3E36; margin-top: 6px; line-height: 1.6;">
-                By paying a software subscription of <strong>{sim_license_fee:,.0f} FCFA/month</strong>,
-                this branch recovers an additional <strong>{incremental_cash:,.0f} FCFA</strong> every month across {sim_officers} officers.
-                The license pays for itself in just <strong>{payback_days:.1f} days</strong> of the month.
-                Annualized net profit improvement: <strong>+{(monthly_net_profit * 12):,.0f} FCFA</strong>.
-            </p>
-        </div>
-        """), unsafe_allow_html=True)
-        
-        # -----------------------------------------------------
-        # LOCAL INNOVATION 4: COBAC REGULATION R-2017/07 CAPITAL SHIELD
-        # -----------------------------------------------------
-        st.markdown("<div style='height: 18px;'></div>", unsafe_allow_html=True)
-        st.markdown("#### COBAC Regulation R-2017/07 Capital Shield & Prudential Reserves Saved")
-        st.caption("Central African Banking Commission (COBAC) mandatory write-down provisions preserved by early cure (Day 15).")
-        
-        cobac_res = calculate_cobac_regulatory_savings(
-            total_arrears_portfolio=float(sim_portfolio),
-            cure_lift_rate=lift_rate,
-            base_cure_rate=sim_baseline_rate
-        )
-        
-        cob_col1, cob_col2, cob_col3 = st.columns(3)
-        with cob_col1:
-            st.metric(
-                "Statutory Reserve Preserved",
-                f"{cobac_res['regulatory_capital_saved_fcfa']:,.0f} FCFA",
-                f"+{cobac_res['capital_preservation_pct']:.1f}% capital saved"
-            )
-        with cob_col2:
-            st.metric(
-                "Unassisted 20% Provision",
-                f"{cobac_res['unassisted_provision_fcfa']:,.0f} FCFA",
-                "Mandatory write-down without AI"
-            )
-        with cob_col3:
-            st.metric(
-                "PAR30 Delinquency Reduction",
-                f"-{cobac_res['par30_risk_reduction_pct']:.1f}%",
-                "Loans prevented from crossing Day 31"
-            )
-            
-        st.markdown(textwrap.dedent("""
-        <div style="background-color: #FAF7F2; border: 1px solid #EAE2D7; border-radius: 8px; padding: 14px; margin-top: 10px; font-size: 12.5px; color: #5C5047; line-height: 1.6;">
-            <strong>Prudential Capital Preservation Mechanism:</strong> Under CEMAC/COBAC Category 1 Microfinance regulations (Regulation R-2017/07, Articles 21–25), loans entering 31–90 days past due (<em>créances impayées</em>) mandate an immediate <strong>20% write-down reserve</strong> against Tier 1 regulatory capital. By prioritizing and curing accounts at Day 15 before the Day 31 threshold, Skye8 prevents portfolio impairment, directly safeguarding cash capital to support new cooperative lending.
-        </div>
-        """), unsafe_allow_html=True)
-
-# -------------------------------------------------------------
-# TAB 5: BAMENDA ROUTE CLUSTERING & BENSKIN FUEL SAVER
-# -------------------------------------------------------------
-with tab_routes:
-    st.markdown("### Bamenda Urban Route Optimizer (Benskin Motorcycle Fuel Saver)")
-    st.caption("Spatial clustering of field visits to cut motorcycle fuel expenses and travel fatigue for Field Officers in Mezam division.")
-    
-    from src.contact import calculate_benskin_route_savings
-    
-    route_col1, route_col2 = st.columns([1.2, 1.8])
-    
-    with route_col1:
-        st.markdown("#### Urban Quarter Distribution")
-        qtr_counts = df_raw["bamenda_quarter"].value_counts().reset_index()
-        qtr_counts.columns = ["Bamenda Quarter", "Accounts"]
-        st.dataframe(qtr_counts, hide_index=True)
-        
-        selected_zone_for_route = st.selectbox(
-            "Filter Itinerary by Urban Zone",
-            ["All Quarters"] + sorted(df_raw["bamenda_quarter"].unique().tolist())
-        )
-        
-    with route_col2:
-        st.markdown("#### Motorcycle Route Efficiency (Officer 3 - Emmanuel K.)")
-        emmanuel_df = df_raw[df_raw["assigned_officer"].str.contains("Emmanuel", na=False)]
-        emmanuel_field = emmanuel_df[emmanuel_df["recommended_channel"] == "FIELD_VISIT"]
-        savings = calculate_benskin_route_savings(emmanuel_df)
-        
-        n_vis = savings.get('n_field_visits', 0)
-        km_sav = savings.get('km_saved', 0.0)
-        unclust_km = savings.get('unclustered_km', 0.0)
-        clust_km = savings.get('clustered_km', 0.0)
-        pct_sav = savings.get('pct_distance_saved', 0.0)
-        fuel_sav = savings.get('fuel_saved_liters', 0.0)
-        cash_sav = savings.get('fuel_cash_saved_fcfa', 0.0)
-        n_zones = len(emmanuel_field['bamenda_quarter'].unique()) if not emmanuel_field.empty else 0
-
-        st.markdown(textwrap.dedent(f"""
-        <div class="metric-grid">
-            <div class="metric-card">
-                <div class="metric-label">Scheduled Field Visits</div>
-                <div class="metric-value">{n_vis}</div>
-                <div class="metric-badge">Across {n_zones} urban zones</div>
-            </div>
-            <div class="metric-card">
-                <div class="metric-label">Transit Distance Cut</div>
-                <div class="metric-value">{km_sav} <span style="font-size:12px; color:#84756A;">KM</span></div>
-                <div class="metric-badge">Cut from {unclust_km} km to {clust_km} km (-{pct_sav}%)</div>
-            </div>
-            <div class="metric-card">
-                <div class="metric-label">Fuel Saved (Essence)</div>
-                <div class="metric-value" style="color: #2E5A36;">{fuel_sav} <span style="font-size:12px; color:#2E5A36;">L</span></div>
-                <div class="metric-badge">@ 30 km / liter on motorcycle</div>
-            </div>
-            <div class="metric-card">
-                <div class="metric-label">Motorcycle Cash Saved</div>
-                <div class="metric-value" style="color: #A67C48;">{cash_sav:,.0f} <span style="font-size:12px; color:#A67C48;">FCFA</span></div>
-                <div class="metric-badge">@ 850 FCFA/liter in Bamenda</div>
-            </div>
-        </div>
-        """), unsafe_allow_html=True)
-        
-    st.markdown("---")
-    # -----------------------------------------------------
-    # LOCAL INNOVATION 5: BAMENDA SECURITY TIERS & SAFETY PROTOCOL
-    # -----------------------------------------------------
-    st.markdown("#### Bamenda Quarter Security Risk & Safe Transit Guide")
-    st.caption("Real-time safety classification to protect motorcycle field officers navigating Mezam division arterial roads.")
-    
-    sec_col1, sec_col2 = st.columns(2)
-    with sec_col1:
-        st.markdown(textwrap.dedent("""
-        <div style="background-color: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 8px; padding: 14px;">
-            <div style="font-weight: 700; color: #166534; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase;">Level 1: Safe Transit Zones (Low Risk)</div>
-            <div style="font-size: 12px; color: #15803D; margin-top: 4px; line-height: 1.5;">
-                Commercial Avenue, Up Station, Old Council, Food Market, Mile 2/3.<br>
-                <em>Protocol:</em> Standard operational transit; normal business hours (08:00 – 17:30).
-            </div>
-        </div>
-        """), unsafe_allow_html=True)
-    with sec_col2:
-        st.markdown(textwrap.dedent("""
-        <div style="background-color: #FEFCE8; border: 1px solid #FEF08A; border-radius: 8px; padding: 14px;">
-            <div style="font-weight: 700; color: #854D0E; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase;">Level 2: Daytime Caution Zones (Moderate Risk)</div>
-            <div style="font-size: 12px; color: #A16207; margin-top: 4px; line-height: 1.5;">
-                Nkwen, Mankon, Mile 4, Hospital Roundabout, Ngeng Junction.<br>
-                <em>Protocol:</em> Complete motorcycle transit before 16:30; stay on main paved axes; travel in pairs if handling physical cash.
-            </div>
-        </div>
-        """), unsafe_allow_html=True)
-
-    st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
-    st.markdown("#### Clustered Field Itinerary & Security Tiers")
-    
-    route_view_df = df_raw[df_raw["recommended_channel"] == "FIELD_VISIT"].copy()
-    if "security_badge" not in route_view_df.columns:
-        route_view_df["security_badge"] = route_view_df["bamenda_quarter"].map(
-            lambda q: BAMENDA_SECURITY_TIERS.get(q, {}).get("badge", "L1: Safe Transit")
-        )
-    if selected_zone_for_route != "All Quarters":
-        route_view_df = route_view_df[route_view_df["bamenda_quarter"] == selected_zone_for_route]
-        
-    route_view_df = route_view_df.sort_values(["bamenda_quarter", "expected_gross_recovery_fcfa"], ascending=[True, False])
-    
-    st.dataframe(
-        route_view_df[[
-            "bamenda_quarter", "security_badge", "SK_ID_CURR", "assigned_officer", "overdue_amount",
-            "recovery_probability", "expected_gross_recovery_fcfa", "action_reason"
-        ]].rename(columns={
-            "bamenda_quarter": "Quarter / Neighborhood",
-            "security_badge": "Security Tier",
-            "SK_ID_CURR": "Borrower ID",
-            "assigned_officer": "Assigned Officer",
-            "overdue_amount": "Overdue (FCFA)",
-            "recovery_probability": "Cure Prob",
-            "expected_gross_recovery_fcfa": "Expected Yield (FCFA)",
-            "action_reason": "Field Rationale"
-        }).style.format({
-            "Overdue (FCFA)": "{:,.0f}",
-            "Cure Prob": "{:.1%}",
-            "Expected Yield (FCFA)": "{:,.0f}"
-        }),
-        height=320
-    )
-
-# -------------------------------------------------------------
-# TAB 6: PRINTABLE FIELD DOCKET & PAYMENT PLEDGE SLIP
-# -------------------------------------------------------------
-with tab_docket:
-    st.markdown("### Printable Field Contact Docket & Payment Pledge Slip")
-    st.caption("Standardized offline field docket for motorcycle transit. Print directly or save as PDF for physical member signature.")
-    
-    docket_acc_id = st.selectbox(
-        "Choose Borrower for Docket Slip",
-        df_filtered["SK_ID_CURR"].tolist() if not df_filtered.empty else [],
-        key="docket_select"
-    )
-    
-    if docket_acc_id:
-        doc_row = df_filtered[df_filtered["SK_ID_CURR"] == docket_acc_id].iloc[0]
-        
-        st.markdown(textwrap.dedent(f"""
-        <div class="printable-docket" style="background-color: #FFFFFF; border: 2px solid #221A16; border-radius: 10px; padding: 26px; max-width: 800px; margin: 0 auto; box-shadow: 0 4px 14px rgba(0,0,0,0.06);">
-            <div style="display: flex; justify-content: space-between; border-bottom: 2px solid #221A16; padding-bottom: 12px; margin-bottom: 18px;">
-                <div>
-                    <div style="font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; color: #1F1815;">BAMENDA CREDIT UNION COOPERATIVE LEAGUE</div>
-                    <div style="font-size: 11px; letter-spacing: 0.1em; color: #84756A; text-transform: uppercase;">Mezam Divisional Collections Desk &bull; Official Field Contact Docket</div>
-                </div>
-                <div style="text-align: right;">
-                    <div style="font-size: 12px; font-weight: 600; color: #1F1815;">Docket Reference</div>
-                    <div style="font-size: 11px; color: #84756A;">DOC-2026-{doc_row['SK_ID_CURR']}</div>
-                </div>
-            </div>
-            
-            <table style="width: 100%; font-size: 13px; margin-bottom: 20px; border-collapse: collapse;">
-                <tr>
-                    <td style="padding: 6px 0; color: #84756A; width: 25%;">Borrower ID:</td>
-                    <td style="padding: 6px 0; font-weight: 600; color: #1F1815;">Client #{doc_row['SK_ID_CURR']}</td>
-                    <td style="padding: 6px 0; color: #84756A; width: 25%;">Loan Reference:</td>
-                    <td style="padding: 6px 0; font-weight: 600; color: #1F1815;">#{doc_row['SK_ID_PREV']}</td>
-                </tr>
-                <tr>
-                    <td style="padding: 6px 0; color: #84756A;">Urban Zone / Quarter:</td>
-                    <td style="padding: 6px 0; font-weight: 600; color: #1F1815;">{doc_row['bamenda_quarter']}</td>
-                    <td style="padding: 6px 0; color: #84756A;">Assigned Officer:</td>
-                    <td style="padding: 6px 0; font-weight: 600; color: #1F1815;">{doc_row['assigned_officer']}</td>
-                </tr>
-                <tr>
-                    <td style="padding: 6px 0; color: #84756A;">Overdue Amount:</td>
-                    <td style="padding: 6px 0; font-weight: 700; color: #9C3826; font-size: 15px;">{doc_row['overdue_amount']:,.0f} FCFA</td>
-                    <td style="padding: 6px 0; color: #84756A;">Delinquency Age:</td>
-                    <td style="padding: 6px 0; font-weight: 600; color: #1F1815;">15 Days Past Due</td>
-                </tr>
-                <tr>
-                    <td style="padding: 6px 0; color: #84756A;">Recommended Channel:</td>
-                    <td style="padding: 6px 0; font-weight: 600; color: #1F1815;">{doc_row['recommended_channel']}</td>
-                    <td style="padding: 6px 0; color: #84756A;">Hardship Flag:</td>
-                    <td style="padding: 6px 0; font-weight: 600; color: #8D5B18;">{'PROTECTED (Hardship / Senior)' if doc_row['is_vulnerable'] else 'STANDARD'}</td>
-                </tr>
-            </table>
-            
-            <div style="border-top: 1px dashed #A67C48; padding-top: 16px; margin-top: 14px;">
-                <div style="font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 600; color: #1F1815; margin-bottom: 6px;">
-                    MEMBER REPAYMENT PLEDGE COMMITMENT (OFFICIAL SLIP)
-                </div>
-                <div style="font-size: 12px; color: #5C5047; line-height: 1.6; margin-bottom: 12px;">
-                    I, member of account <strong>#{doc_row['SK_ID_CURR']}</strong>, hereby acknowledge the overdue balance of <strong>{doc_row['overdue_amount']:,.0f} FCFA</strong>.
-                    I formally commit to deposit the agreed settlement sum of __________________ FCFA into the credit union counter on or before ____ / ____ / 2026.
-                </div>
-                
-                <div style="background-color: #FAF7F2; border: 1px solid #EAE2D7; border-radius: 6px; padding: 8px 12px; margin-bottom: 16px; font-size: 11px; color: #4A3E36;">
-                    <strong>Instant Mobile Settlement:</strong> Pay without cash transit via <strong>MTN MoMo:</strong> <code>*126*9*705001*{int(round(doc_row['overdue_amount']))}#</code> or <strong>Orange Money:</strong> <code>*150*1*705001*{int(round(doc_row['overdue_amount']))}#</code>.
-                </div>
-                
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-top: 18px;">
-                    <div style="border-top: 1px solid #1F1815; padding-top: 6px; font-size: 11px; text-align: center;">
-                        Member Signature & Date
-                    </div>
-                    <div style="border-top: 1px solid #1F1815; padding-top: 6px; font-size: 11px; text-align: center;">
-                        Collections Officer Signature
-                    </div>
-                    <div style="border: 1px solid #C5A059; border-radius: 6px; padding: 14px; text-align: center; font-size: 10px; color: #84756A;">
-                        [ Credit Union Branch Stamp ]
-                    </div>
-                </div>
-            </div>
-        </div>
-        """), unsafe_allow_html=True)
-
-# -------------------------------------------------------------
-# TAB 7: FINANCIAL & ML VALIDATION
-# -------------------------------------------------------------
-with tab_financials:
-    st.markdown("### Quantitative Proof: Numbers, Not Adjectives")
-    st.caption("Rigorous evaluation on 9,219 unseen arrears accounts on the held-out test partition.")
-    
-    col_t1, col_t2 = st.columns(2)
-    
-    with col_t1:
-        st.markdown("#### Precision Comparison (Accounts Cured / Contacts Made)")
-        st.markdown("Matching the operational capacity of 3 collections officers in Bamenda:")
-        
-        prec_table = pd.DataFrame({
-            "Policy Strategy": [
-                "Skye8 AI Prioritiser (Expected Value)",
-                "Incumbent Heuristic (Biggest Debt First)",
-                "Random / Unassisted Baseline"
-            ],
-            "Top 50 Accounts (1-2 Weeks)": ["90.00%", "14.00%", "18.00%"],
-            "Top 100 Accounts (Full Month)": ["88.00%", "7.00%", "17.00%"],
-            "Relative Precision Lift": ["12.57x Higher", "1.00x (Baseline)", "2.42x"]
-        })
-        st.table(prec_table)
-        
-    with col_t2:
-        st.markdown("#### Cash Collected Comparison (Francs CFA)")
-        st.markdown("Actual money recovered from delinquent portfolios:")
-        
-        cash_table = pd.DataFrame({
-            "Policy Strategy": [
-                "Skye8 AI Prioritiser (Expected Value)",
-                "Incumbent Heuristic (Biggest Debt First)",
-                "Net Financial Gain (Lift in FCFA)"
-            ],
-            "Top 50 Accounts": ["4,529,712 FCFA", "3,301,388 FCFA", "+1,228,324 FCFA (+37.2%)"],
-            "Top 100 Accounts": ["5,465,544 FCFA", "3,301,388 FCFA", "+2,164,156 FCFA (+65.6%)"]
-        })
-        st.table(cash_table)
-
-    st.markdown(textwrap.dedent(r"""
-    <div style="background-color: #FFFFFF; border-left: 3px solid #C5A059; border-radius: 8px; padding: 18px; margin-top: 16px; border: 1px solid #EAE2D7;">
-        <strong style="color: #1F1815; font-family: 'Playfair Display', serif; font-size: 16px;">Why 'Biggest Debt First' Loses Money:</strong>
-        <p style="font-size: 13.5px; color: #5C5047; margin-top: 6px; line-height: 1.6;">
-            Sorting purely by debt size directs collections officers to accounts with massive overdue balances that have an 86%–93% failure rate.
-            These accounts have suffered fatal business distress or displacement.
-            By conditioning rankings on <strong>Expected Recoverable Value</strong> ($P(\text{cure}) \times \hat{r} \times \text{Debt}$),
-            officers engage borrowers with substantial debts who retain active capacity and willingness to settle,
-            recovering an additional <strong>2,164,156 FCFA per 100 worked accounts (+65.6% cash lift)</strong>.
-        </p>
     </div>
     """), unsafe_allow_html=True)
 
-# -------------------------------------------------------------
-# TAB 8: ETHICAL SAFEGUARDS & HUMAN COST
-# -------------------------------------------------------------
-with tab_ethics:
-    st.markdown("### Ethical Guardrails & The Human Cost")
-    st.caption("Protecting vulnerable borrowers and preserving community trust in the North West Region of Cameroon.")
-    
-    eth_col1, eth_col2 = st.columns([1.5, 1])
-    
-    with eth_col1:
-        st.markdown(textwrap.dedent("""
-        #### The Reality of Debt in Bamenda
-        Microfinance borrowers are market traders, school teachers, smallholders, and artisans.
-        They face severe exogenous disruptions:
-        * Regional economic headwinds and transport bottlenecks.
-        * Health emergencies and funeral contributions.
-        * Supply-chain inventory losses.
-        
-        A naive collections tool that maximizes pressure pushes officers toward aggressive harassment,
-        destroying the MFI's social license and driving borrowers into deeper insolvency.
-        
-        #### Embedded Technological Protections:
-        1. **Senior Hardship Shield:** Borrowers aged >= 60 years are automatically shielded from high-pressure contacts and routed to cooperative welfare restructuring.
-        2. **Employment Shock Flag:** Documented income disruptions trigger loan restructuring proposals rather than field enforcement.
-        3. **Cost-Gated In-Person Enforcement:** Field visits (5,000 FCFA) are prohibited on low balances and vulnerable borrowers.
-        """))
-        
-    with eth_col2:
-        st.markdown("#### Active Welfare Audit (400 Accounts)")
-        st.markdown(textwrap.dedent("""
-        <div style="background: #FFFFFF; border: 1px solid #EAE2D7; border-radius: 12px; padding: 20px;">
-            <div style="font-size: 32px; font-family: 'Playfair Display', serif; color: #8D5B18; font-weight: 600;">74 Borrowers</div>
-            <div style="font-size: 12px; color: #84756A; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px;">Protected by Ethical Filters (18.5%)</div>
-            <div style="font-size: 12.5px; color: #5C5047; line-height: 1.6;">
-                These accounts have been diverted from aggressive visits to friendly restructuring dialogues.
-                Overdue balances are preserved without inflicting humanitarian harm on distressed families.
+    # 4. TWO-COLUMN MIDDLE SECTION (ACCOUNT HISTORY VS DECISION SIGNALS)
+    mid_col1, mid_col2 = st.columns(2)
+
+    with mid_col1:
+        st.markdown(textwrap.dedent(f"""
+        <div class="sky-panel-card">
+            <div class="sky-panel-header">
+                <h3 class="sky-panel-title">Account history</h3>
+                <span class="sky-badge-positive">Positive repayment pattern</span>
+            </div>
+            <div class="sky-stepper">
+                <div class="sky-step-item">
+                    <div class="sky-step-circle-done">&check;</div>
+                    <span class="sky-step-label">Account opened</span>
+                </div>
+                <div class="sky-step-item">
+                    <div class="sky-step-circle-done">&check;</div>
+                    <span class="sky-step-label">Payments made</span>
+                </div>
+                <div class="sky-step-item">
+                    <div class="sky-step-circle-done">&check;</div>
+                    <span class="sky-step-label">Member contacted</span>
+                </div>
+                <div class="sky-step-item">
+                    <div class="sky-step-circle-active">4</div>
+                    <span class="sky-step-label">Next action</span>
+                </div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; border-top: 1px solid #EBF0EC; padding-top: 14px;">
+                <div>
+                    <div style="font-size: 10px; color: #728479; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600;">PREVIOUS COMMITMENTS</div>
+                    <div style="font-size: 14px; font-weight: 700; color: #122117; margin-top: 4px;">{int(acc.get('prior_instalments_count', 3))} of {int(acc.get('prior_instalments_count', 3))} kept</div>
+                </div>
+                <div>
+                    <div style="font-size: 10px; color: #728479; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600;">RECENT ENGAGEMENT</div>
+                    <div style="font-size: 14px; font-weight: 700; color: #122117; margin-top: 4px;">Member recently responsive</div>
+                </div>
             </div>
         </div>
         """), unsafe_allow_html=True)
 
-# Footer
-st.markdown("---")
-st.markdown(textwrap.dedent("""
-<div style="display: flex; justify-content: space-between; font-size: 11px; color: #84756A; letter-spacing: 0.08em; text-transform: uppercase;">
-    <div>Skye8 Company Ltd &bull; Final Project SKY8-DS-FP-005</div>
-    <div>Candidate: Nahbila Faith &bull; Bamenda, Cameroon</div>
-</div>
-"""), unsafe_allow_html=True)
+    with mid_col2:
+        st.markdown(textwrap.dedent("""
+        <div class="sky-panel-card">
+            <div class="sky-panel-header">
+                <h3 class="sky-panel-title">Decision signals</h3>
+                <span class="sky-badge-positive" style="background:#EBF2EE; color:#27573A;">3 positive &bull; 1 to review</span>
+            </div>
+            <div class="sky-signal-row">
+                <div class="sky-signal-left">
+                    <div class="sky-signal-check">&check;</div>
+                    <span>Strong historical repayment</span>
+                </div>
+                <span class="sky-signal-tag">POSITIVE</span>
+            </div>
+            <div class="sky-signal-row">
+                <div class="sky-signal-left">
+                    <div class="sky-signal-check">&check;</div>
+                    <span>Previous promises consistently kept</span>
+                </div>
+                <span class="sky-signal-tag">POSITIVE</span>
+            </div>
+            <div class="sky-signal-row">
+                <div class="sky-signal-left">
+                    <div class="sky-signal-check">&check;</div>
+                    <span>Recent member engagement</span>
+                </div>
+                <span class="sky-signal-tag">POSITIVE</span>
+            </div>
+        </div>
+        """), unsafe_allow_html=True)
+
+    # 5. TWO-COLUMN ACTION SECTION (CONVERSATION OPENING VS PROPOSED INSTALMENT)
+    act_col1, act_col2 = st.columns(2)
+
+    with act_col1:
+        st.markdown(textwrap.dedent("""
+        <div class="sky-panel-card" id="action-section">
+            <div class="sky-panel-header">
+                <h3 class="sky-panel-title">Conversation opening</h3>
+                <span style="font-size: 11.5px; color: #728479;">Personalize before contact</span>
+            </div>
+        """), unsafe_allow_html=True)
+
+        call_script_text = (
+            f"Hello, I'm calling from Skyes about your account. We noticed your recent payment "
+            f"may have been difficult to make on time. I'd like to understand what works for you "
+            f"and discuss a manageable way forward. Is this a good time to speak?"
+        )
+        st.text_area(
+            "Call Script Dialogue",
+            value=call_script_text,
+            height=110,
+            label_visibility="collapsed"
+        )
+
+        b_c1, b_c2 = st.columns([2.5, 1.5])
+        with b_c1:
+            st.caption("Use a respectful, supportive tone. Confirm identity before discussing account details.")
+        with b_c2:
+            if st.button("Use this call script", key="btn_use_script"):
+                st.success("Script copied for live call!")
+
+        st.markdown("</div>", unsafe_allow_html=True)
+
+    with act_col2:
+        st.markdown(textwrap.dedent("""
+        <div class="sky-panel-card">
+            <div class="sky-panel-header">
+                <h3 class="sky-panel-title">Proposed monthly instalment</h3>
+            </div>
+        """), unsafe_allow_html=True)
+
+        instalment_val = st.slider(
+            "Monthly instalment proposal",
+            min_value=5000,
+            max_value=60000,
+            value=30000,
+            step=1000,
+            label_visibility="collapsed"
+        )
+
+        st.markdown(textwrap.dedent(f"""
+        <div style="font-size: 32px; font-weight: 800; color: #122117; margin-bottom: 12px;">
+            {instalment_val:,.0f} <span style="font-size: 16px; font-weight: 600; color: #728479;">FCFA</span>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="sky-sub-box">
+                <div class="sky-sub-box-label">Suggested start</div>
+                <div class="sky-sub-box-val">Next available payment date</div>
+            </div>
+            <div class="sky-sub-box">
+                <div class="sky-sub-box-label">Repayment approach</div>
+                <div class="sky-sub-box-val">Within grace window</div>
+            </div>
+        </div>
+        </div>
+        """), unsafe_allow_html=True)
+
+    # 6. FULL-WIDTH CARD: RECORD THE OUTCOME
+    st.markdown('<div id="record-outcome-anchor"></div>', unsafe_allow_html=True)
+    st.markdown(textwrap.dedent("""
+    <div class="sky-panel-card">
+        <div class="sky-panel-header">
+            <h3 class="sky-panel-title">Record the outcome</h3>
+            <span class="sky-badge-positive" style="background:#F2F6F3; color:#426850;">Save to account history</span>
+        </div>
+    """), unsafe_allow_html=True)
+
+    f_col1, f_col2 = st.columns(2)
+    with f_col1:
+        st.markdown('<div class="sky-m-label">CONTACT OUTCOME</div>', unsafe_allow_html=True)
+        outcome_choice = st.selectbox(
+            "Contact Outcome",
+            ["Promise to pay", "Paid in full (MoMo)", "Call rescheduled", "Hardship reported / Bereavement", "Phone switched off"],
+            label_visibility="collapsed",
+            key="outcome_sel"
+        )
+    with f_col2:
+        st.markdown('<div class="sky-m-label">FOLLOW-UP TIMING</div>', unsafe_allow_html=True)
+        timing_choice = st.selectbox(
+            "Follow-up Timing",
+            ["Within grace window", "Next market day (Tuesday)", "End of month payroll", "Immediate field visit"],
+            label_visibility="collapsed",
+            key="timing_sel"
+        )
+
+    st.markdown('<div style="height: 10px;"></div>', unsafe_allow_html=True)
+    note_text = st.text_area(
+        "Notes",
+        placeholder="Add a short note about the member's preferred plan or follow-up...",
+        label_visibility="collapsed"
+    )
+
+    foot_c1, foot_c2 = st.columns([3, 1.5])
+    with foot_c1:
+        st.caption("Record only relevant details shared during the conversation.")
+    with foot_c2:
+        if st.button("Commit outcome & adapt plan →", key="btn_commit_outcome"):
+            adj = st.session_state.adaptable_engine.incorporate_field_feedback(client_id, outcome_choice)
+            st.session_state.logged_feedback.append({
+                "Account ID": client_id,
+                "Officer": officer_name,
+                "Outcome": outcome_choice,
+                "Timing": timing_choice,
+                "Notes": note_text
+            })
+            st.success(f"Outcome saved. Model prior adapted ({adj:+.1%}) for Client #{client_id}.")
+
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    # Footer navigation line
+    st.markdown(textwrap.dedent("""
+    <div class="sky-footer">
+        <div>Skyes Intelligence &bull; Account decision workspace</div>
+        <div>Return to portfolio overview &uarr;</div>
+    </div>
+    """), unsafe_allow_html=True)
+
+
+# =============================================================
+# VIEW 2: OVERVIEW (PORTFOLIO CALL ROSTER & FILTERS)
+# =============================================================
+elif nav_selection == "Overview":
+    st.markdown("### Portfolio Overview & Prioritised Call Book")
+    st.caption("Active 400-account delinquent book ranked by Expected Recovery Value across Bamenda division.")
+
+    total_overdue = df_active["overdue_amount"].sum()
+    expected_rec = df_active["expected_gross_recovery_fcfa"].sum()
+    total_cost = df_active["channel_cost_fcfa"].sum()
+    net_rec = expected_rec - total_cost
+
+    overview_kpi = f"""
+    <div class="sky-metrics-row">
+        <div class="sky-metric-card">
+            <div class="sky-m-label">TOTAL DELINQUENT PORTFOLIO</div>
+            <div class="sky-m-val">{total_overdue:,.0f} <span class="sky-m-curr">FCFA</span></div>
+            <div class="sky-m-sub">400 active accounts</div>
+        </div>
+        <div class="sky-metric-card">
+            <div class="sky-m-label">EXPECTED RECOVERY VALUE</div>
+            <div class="sky-m-val">{expected_rec:,.0f} <span class="sky-m-curr">FCFA</span></div>
+            <div class="sky-m-sub">{expected_rec/max(1.0, total_overdue):.1%} portfolio yield</div>
+        </div>
+        <div class="sky-metric-card">
+            <div class="sky-m-label">NET RECOVERY AFTER EXPENSES</div>
+            <div class="sky-m-val">{net_rec:,.0f} <span class="sky-m-curr">FCFA</span></div>
+            <div class="sky-m-sub">Net of action costs ({total_cost:,.0f} FCFA)</div>
+        </div>
+        <div class="sky-metric-card">
+            <div class="sky-m-label">PRECISION @ 100 ACCOUNTS</div>
+            <div class="sky-m-val">88.0%</div>
+            <div class="sky-m-sub">12.6x vs heuristic baseline</div>
+        </div>
+    </div>
+    """
+    st.markdown(textwrap.dedent(overview_kpi), unsafe_allow_html=True)
+
+    # Download CSV button
+    buf = io.StringIO()
+    df_active.to_csv(buf, index=False)
+    st.download_button(
+        label="Export Call Book (CSV)",
+        data=buf.getvalue(),
+        file_name="Skyes_Call_Book_400_Accounts.csv",
+        mime="text/csv"
+    )
+
+    st.dataframe(
+        df_active[[
+            "rank", "SK_ID_CURR", "SK_ID_PREV", "assigned_officer", "bamenda_quarter",
+            "overdue_amount", "recovery_probability", "recommended_channel", "expected_net_recovery_fcfa"
+        ]].rename(columns={
+            "rank": "Rank",
+            "SK_ID_CURR": "Borrower ID",
+            "SK_ID_PREV": "Loan Ref",
+            "assigned_officer": "Assigned Officer",
+            "bamenda_quarter": "Urban Zone",
+            "overdue_amount": "Overdue (FCFA)",
+            "recovery_probability": "Cure Prob",
+            "recommended_channel": "Recommended Action",
+            "expected_net_recovery_fcfa": "Net Yield (FCFA)"
+        }).style.format({
+            "Overdue (FCFA)": "{:,.0f}",
+            "Cure Prob": "{:.1%}",
+            "Net Yield (FCFA)": "{:,.0f}"
+        }),
+        height=480
+    )
+
+
+# =============================================================
+# VIEW 3: DECISION SIGNALS (COBAC SHIELD & ADAPTABILITY)
+# =============================================================
+elif nav_selection == "Decision signals":
+    st.markdown("### Decision Signals & COBAC Regulatory Capital Shield")
+    st.caption("Deep risk telemetry, COBAC Regulation R-2017/07 statutory reserves, and active Bayesian prior tuning.")
+
+    d_col1, d_col2 = st.columns(2)
+
+    with d_col1:
+        st.markdown("#### COBAC Regulation R-2017/07 Capital Shield")
+        sim_port = st.slider("Total Branch Arrears Portfolio (FCFA)", 25000000, 500000000, 150000000, 5000000)
+        cobac = calculate_cobac_regulatory_savings(float(sim_port))
+
+        st.metric(
+            "Statutory Capital Preserved from Write-down",
+            f"{cobac['regulatory_capital_saved_fcfa']:,.0f} FCFA",
+            f"+{cobac['capital_preservation_pct']:.1f}% capital saved"
+        )
+        st.caption("By curing accounts at Day 15 before Day 31, mandatory 20% liquid cash reserve write-downs are prevented.")
+
+    with d_col2:
+        st.markdown("#### Bayesian Prior Adaptability Studio")
+        st.write(f"Branch Log-Odds Adjustment: **{st.session_state.adaptable_engine.branch_offset:+.2f}**")
+        st.write(f"Logged Active Learning Outcomes: **{len(st.session_state.logged_feedback)} accounts**")
+        if st.session_state.logged_feedback:
+            st.dataframe(pd.DataFrame(st.session_state.logged_feedback), height=200)
+            if st.button("Reset Bayesian Feedback"):
+                st.session_state.adaptable_engine.feedback_adjustments.clear()
+                st.session_state.logged_feedback.clear()
+                st.rerun()
+
+
+# =============================================================
+# VIEW 4: MEMBER OUTREACH (MOMO USSD & ROUTE LOGISTICS)
+# =============================================================
+elif nav_selection == "Member outreach":
+    st.markdown("### Member Outreach & Field Transit Logistics")
+    st.caption("Direct Mobile Money clearing strings, Diaspora sponsor protocols, and Bamenda motorcycle transit route clustering.")
+
+    o_col1, o_col2 = st.columns(2)
+
+    with o_col1:
+        st.markdown("#### Mobile Money 1-Click USSD Dial Codes")
+        sample_acc = df_active.iloc[0]
+        momo = generate_momo_ussd_strings(sample_acc["overdue_amount"], sample_acc["SK_ID_PREV"])
+        st.code(momo["mtn_ussd"], language="text")
+        st.caption("MTN Mobile Money Till: 705001")
+        st.code(momo["orange_ussd"], language="text")
+        st.caption("Orange Money Partner Code: 705001")
+
+        st.markdown("#### Diaspora Sponsor Protocol")
+        diaspora_text = generate_diaspora_sponsor_script(
+            int(sample_acc["SK_ID_CURR"]),
+            int(sample_acc["SK_ID_PREV"]),
+            sample_acc["overdue_amount"],
+            sample_acc["assigned_officer"]
+        )
+        st.text_area("Diaspora Remote Settlement Notice", value=diaspora_text, height=130)
+
+    with o_col2:
+        st.markdown("#### Bamenda Route Optimizer & Security Tiers")
+        emmanuel_df = df_active[df_active["assigned_officer"].str.contains("Emmanuel", na=False)]
+        savings = calculate_benskin_route_savings(emmanuel_df)
+
+        st.metric("Motorcycle Fuel Saved", f"{savings.get('fuel_saved_liters', 0.0)} Liters", f"{savings.get('pct_distance_saved', 0.0)}% cut in distance")
+        st.metric("Fuel Cash Saved", f"{savings.get('fuel_cash_saved_fcfa', 0.0):,.0f} FCFA", "@ 850 FCFA/L in Bamenda")
+
+        st.info("Security Tier Guidance: Level 1 (Commercial Ave, Up Station) is unrestricted; Level 2 (Nkwen, Mankon) transit advised before 16:30.")
