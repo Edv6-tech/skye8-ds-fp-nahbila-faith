@@ -10,6 +10,7 @@ Features:
 - Mobile-responsive, high-craft aesthetics.
 """
 from pathlib import Path
+import textwrap
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -37,7 +38,7 @@ def load_data():
 df_raw = load_data()
 
 # Inject High-Luxury Editorial CSS including Super Elegant Dark Sidebar
-st.markdown("""
+st.markdown(textwrap.dedent("""
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -418,7 +419,7 @@ st.markdown("""
         font-size: 13px !important;
     }
 </style>
-""", unsafe_allow_html=True)
+"""), unsafe_allow_html=True)
 
 if df_raw.empty:
     st.error("Weekly portfolio data not found. Please run `python run_pipeline.py` first.")
@@ -428,7 +429,7 @@ if df_raw.empty:
 # SUPER ELEGANT SIDEBAR (EXECUTIVE CONTROLS & TELEMETRY)
 # =============================================================
 with st.sidebar:
-    st.markdown("""
+    st.markdown(textwrap.dedent("""
     <div class="sidebar-brand-block">
         <div class="sidebar-crest">⚜️</div>
         <h2 class="sidebar-title">SKYE8 PRIORITISER</h2>
@@ -438,7 +439,7 @@ with st.sidebar:
             Model Active &bull; Zero Leakage
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    """), unsafe_allow_html=True)
     
     st.markdown("### 🎛️ Portfolio Controls")
     
@@ -458,26 +459,26 @@ with st.sidebar:
     st.markdown("---")
     
     # Live Officer Capacity Card
-    st.markdown("""
+    st.markdown(textwrap.dedent("""
     <div class="sidebar-card">
         <div class="sidebar-card-title">👥 Officer Caseload Distribution</div>
-    """, unsafe_allow_html=True)
+    """), unsafe_allow_html=True)
     
     officer_counts = df_raw["assigned_officer"].value_counts()
     for off_name in sorted(officer_counts.index):
         cnt = officer_counts[off_name]
         short_name = off_name.split(" - ")[-1]
-        st.markdown(f"""
+        st.markdown(textwrap.dedent(f"""
         <div class="sidebar-stat-row">
             <span class="sidebar-stat-name">{short_name}</span>
             <span class="sidebar-stat-val">{cnt} accounts</span>
         </div>
-        """, unsafe_allow_html=True)
+        """), unsafe_allow_html=True)
         
     st.markdown("</div>", unsafe_allow_html=True)
     
     # Channel Cost Reference Card
-    st.markdown("""
+    st.markdown(textwrap.dedent("""
     <div class="sidebar-card">
         <div class="sidebar-card-title">💰 Channel Unit Economics</div>
         <div class="sidebar-stat-row">
@@ -493,13 +494,13 @@ with st.sidebar:
             <span class="sidebar-stat-val">5,000 FCFA</span>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    """), unsafe_allow_html=True)
     
-    st.markdown("""
+    st.markdown(textwrap.dedent("""
     <div style="font-size: 10px; color: #8C7E75; text-align: center; letter-spacing: 0.1em; text-transform: uppercase;">
         Skye8 Final Project SKY8-DS-FP-005<br>Nahbila Faith &bull; October 2026
     </div>
-    """, unsafe_allow_html=True)
+    """), unsafe_allow_html=True)
 
 # -------------------------------------------------------------
 # FILTER DATA ENGINE
@@ -522,7 +523,7 @@ df_filtered = df_filtered[df_filtered["recovery_probability"] >= min_prob]
 # -------------------------------------------------------------
 # HERO BANNER (EDITORIAL LUXURY DESIGN)
 # -------------------------------------------------------------
-st.markdown("""
+st.markdown(textwrap.dedent("""
 <div class="hero-container">
     <div class="hero-eyebrow">Skye8 Intelligence &bull; Core ML &bull; Bamenda, Cameroon</div>
     <div class="hero-title">The <em>precision</em> of recovery,<br>the <em>depth</em> of care.</div>
@@ -531,7 +532,7 @@ st.markdown("""
         optimizing contact channel economics, and safeguarding vulnerable borrowers across 400 credit union accounts.
     </div>
 </div>
-""", unsafe_allow_html=True)
+"""), unsafe_allow_html=True)
 
 # -------------------------------------------------------------
 # EXECUTIVE KPI METRICS (BESPOKE HTML GRID)
@@ -541,7 +542,7 @@ expected_rec = df_filtered["expected_gross_recovery_fcfa"].sum()
 total_cost = df_filtered["channel_cost_fcfa"].sum()
 net_rec = expected_rec - total_cost
 
-st.markdown(f"""
+st.markdown(textwrap.dedent(f"""
 <div class="metric-grid">
     <div class="metric-card">
         <div class="metric-label">Active Arrears Book</div>
@@ -569,7 +570,7 @@ st.markdown(f"""
         <div class="metric-badge">+64.0% Added Cash per 100 Accounts</div>
     </div>
 </div>
-""", unsafe_allow_html=True)
+"""), unsafe_allow_html=True)
 
 # -------------------------------------------------------------
 # MAIN EDITORIAL TABS
@@ -597,7 +598,8 @@ with tab_dossier:
         channel_tag_class = "tag-sms" if acc["recommended_channel"] == "SMS" else ("tag-call" if acc["recommended_channel"] == "CALL" else "tag-visit")
         vulnerable_tag = f'<span class="tag-vulnerable">Protected &bull; Senior / Hardship</span>' if acc["is_vulnerable"] else '<span class="tag-sms">Standard Operational Flow</span>'
         
-        st.markdown(f"""
+        # Render clean, dedented HTML to prevent markdown from turning it into a pre/code block
+        dossier_html = textwrap.dedent(f"""
         <div class="dossier-card">
             <div class="dossier-header">
                 <div>
@@ -658,7 +660,8 @@ with tab_dossier:
                 </div>
             </div>
         </div>
-        """, unsafe_allow_html=True)
+        """)
+        st.markdown(dossier_html, unsafe_allow_html=True)
 
 # TAB 2: PRIORITISED TABLE VIEW
 with tab_table:
@@ -684,7 +687,6 @@ with tab_table:
         "action_reason": "Rationale"
     })
     
-    # Formatted dataframe without deprecated use_container_width warning
     st.dataframe(
         display_df.style.format({
             "Overdue (FCFA)": "{:,.0f}",
@@ -734,7 +736,7 @@ with tab_financials:
         })
         st.table(cash_table)
 
-    st.markdown("""
+    st.markdown(textwrap.dedent("""
     <div style="background-color: #FFFFFF; border-left: 3px solid #C5A059; border-radius: 8px; padding: 18px; margin-top: 16px; border: 1px solid #EAE3DA;">
         <strong style="color: #1F1815; font-family: 'Playfair Display', serif; font-size: 16px;">Why 'Biggest Debt First' Loses Money:</strong>
         <p style="font-size: 13.5px; color: #5C5047; margin-top: 6px; line-height: 1.6;">
@@ -745,7 +747,7 @@ with tab_financials:
             recovering an additional <strong>2,112,657 FCFA per 100 worked accounts</strong>.
         </p>
     </div>
-    """, unsafe_allow_html=True)
+    """), unsafe_allow_html=True)
 
 # TAB 4: ETHICAL SAFEGUARDS
 with tab_ethics:
@@ -755,7 +757,7 @@ with tab_ethics:
     eth_col1, eth_col2 = st.columns([1.5, 1])
     
     with eth_col1:
-        st.markdown("""
+        st.markdown(textwrap.dedent("""
         #### The Reality of Debt in Bamenda
         Microfinance borrowers are market traders, school teachers, smallholders, and artisans.
         They face severe exogenous disruptions:
@@ -770,11 +772,11 @@ with tab_ethics:
         1. **Senior Hardship Shield:** Borrowers aged >= 60 years are automatically shielded from high-pressure contacts and routed to cooperative welfare restructuring.
         2. **Employment Shock Flag:** Documented income disruptions trigger loan restructuring proposals rather than field enforcement.
         3. **Cost-Gated In-Person Enforcement:** Field visits (5,000 FCFA) are prohibited on low balances and vulnerable borrowers.
-        """)
+        """))
         
     with eth_col2:
         st.markdown("#### Active Welfare Audit (400 Accounts)")
-        st.markdown(f"""
+        st.markdown(textwrap.dedent("""
         <div style="background: #FFFFFF; border: 1px solid #EAE3DA; border-radius: 12px; padding: 20px;">
             <div style="font-size: 32px; font-family: 'Playfair Display', serif; color: #8D5B18; font-weight: 600;">74 Borrowers</div>
             <div style="font-size: 12px; color: #8C7E75; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px;">Protected by Ethical Filters (18.5%)</div>
@@ -783,13 +785,13 @@ with tab_ethics:
                 Overdue balances are preserved without inflicting humanitarian harm on distressed families.
             </div>
         </div>
-        """, unsafe_allow_html=True)
+        """), unsafe_allow_html=True)
 
 # Footer
 st.markdown("---")
-st.markdown("""
+st.markdown(textwrap.dedent("""
 <div style="display: flex; justify-content: space-between; font-size: 11px; color: #8C7E75; letter-spacing: 0.08em; text-transform: uppercase;">
     <div>Skye8 Company Ltd &bull; Final Project SKY8-DS-FP-005</div>
     <div>Candidate: Nahbila Faith &bull; Bamenda, Cameroon</div>
 </div>
-""", unsafe_allow_html=True)
+"""), unsafe_allow_html=True)
