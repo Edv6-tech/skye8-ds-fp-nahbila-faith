@@ -1,0 +1,61 @@
+{
+  "roc_auc": 0.986444420777486,
+  "pr_auc": 0.9291563721156244,
+  "base_recovery_rate": 0.12235600390497885,
+  "total_population": 9219,
+  "total_arrears_book_value": 125412849.225,
+  "k_evaluations": {
+    "50": {
+      "precision_ev": 0.9,
+      "precision_prob": 1.0,
+      "precision_incumbent": 0.14,
+      "precision_random": 0.18,
+      "precision_gain_ratio": 6.428571428571428,
+      "money_recovered_ev": 4529712.104999999,
+      "money_recovered_prob": 341178.3,
+      "money_recovered_incumbent": 3301388.0549999997,
+      "money_recovered_random": 74075.12999999999,
+      "money_lift_fcfa": 1228324.0499999989,
+      "money_lift_pct": 37.20629109745776
+    },
+    "100": {
+      "precision_ev": 0.87,
+      "precision_prob": 1.0,
+      "precision_incumbent": 0.07,
+      "precision_random": 0.17,
+      "precision_gain_ratio": 12.428571428571427,
+      "money_recovered_ev": 5414044.859999999,
+      "money_recovered_prob": 657573.1199999999,
+      "money_recovered_incumbent": 3301388.0549999997,
+      "money_recovered_random": 181131.12,
+      "money_lift_fcfa": 2112656.8049999997,
+      "money_lift_pct": 63.99298627740385
+    },
+    "200": {
+      "precision_ev": 0.855,
+      "precision_prob": 1.0,
+      "precision_incumbent": 0.055,
+      "precision_random": 0.135,
+      "precision_gain_ratio": 15.545454545454545,
+      "money_recovered_ev": 6644910.149999999,
+      "money_recovered_prob": 1326632.58,
+      "money_recovered_incumbent": 3544618.4999999995,
+      "money_recovered_random": 267152.57999999996,
+      "money_lift_fcfa": 3100291.65,
+      "money_lift_pct": 87.46474832199856
+    },
+    "400": {
+      "precision_ev": 0.8625,
+      "precision_prob": 1.0,
+      "precision_incumbent": 0.045,
+      "precision_random": 0.125,
+      "precision_gain_ratio": 19.166666666666668,
+      "money_recovered_ev": 8369223.299999999,
+      "money_recovered_prob": 4729059.63,
+      "money_recovered_incumbent": 3863087.1449999996,
+      "money_recovered_random": 1486968.525,
+      "money_lift_fcfa": 4506136.154999999,
+      "money_lift_pct": 116.64598767419211
+    }
+  }
+}
