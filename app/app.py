@@ -14,9 +14,16 @@ Features:
 - Real-time Borrower ID & Loan Reference Search Engine.
 - Ethical Hardship Safeguards protecting vulnerable & senior households.
 """
+import sys
 from pathlib import Path
 import textwrap
 import io
+
+# Ensure project root is in sys.path when running from app/ subdirectory
+ROOT_DIR = Path(__file__).resolve().parents[1]
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+
 import streamlit as st
 import pandas as pd
 import numpy as np
