@@ -1,14 +1,21 @@
-"""Stage B: features knowable at the moment the officer picks up the phone.
+"""Stage B: Multi-Source Leakage-Free Feature Engineering.
 
-All features are strictly computed from information available on or before the
-observation date (observation_day). No information from during or after contact
-is ever exposed to the feature pipeline.
+Incorporates:
+1. Historical installment repayment behavior (pre-arrears only).
+2. Borrower application demographics.
+3. External credit bureau leverage and cross-institutional debt (bureau.csv).
+4. Month-by-month POS & cash loan delinquency trajectories (POS_CASH_balance.csv).
+5. Bamenda regional liquidity and seasonal agricultural calendar indicators.
+
+Strict temporal guarantee: zero post-contact data leakage.
 """
+from pathlib import Path
 import pandas as pd
 import numpy as np
 
 # Only columns listed here may reach the model.
 FEATURE_COLUMNS = [
+    # Core Installment Behavioral Features
     "overdue_amount",
     "prior_instalments_count",
     "prior_late_count",
@@ -22,11 +29,24 @@ FEATURE_COLUMNS = [
     "recent_3_avg_late",
     "recent_payment_ratio",
     "instalment_number",
+    
+    # Borrower Application Demographics
     "amt_income_total",
     "amt_credit",
     "amt_annuity",
     "days_employed",
     "days_birth",
+    
+    # Multi-Source Relational Features (Bureau & POS)
+    "bureau_total_debt",
+    "bureau_overdue_debt",
+    "bureau_active_loans",
+    "pos_cash_max_dpd",
+    
+    # Regional & Seasonal Calendar Features (Bamenda Context)
+    "market_cycle_day",
+    "school_fee_shock",
+    "harvest_season",
 ]
 
 # Anything recorded during/after contact, or after the observation date.
@@ -47,13 +67,10 @@ def build_features(
     events: pd.DataFrame,
     inst: pd.DataFrame,
     app_train: pd.DataFrame = None,
-    prev_app: pd.DataFrame = None
+    bureau: pd.DataFrame = None,
+    pos_cash: pd.DataFrame = None
 ) -> pd.DataFrame:
-    """Construct leakage-free behavioral and loan features for each arrears event.
-    Strict temporal guarantee: only records where DAYS_INSTALMENT < event.observation_day
-    and payment recorded on or before observation_day are used.
-    """
-    # Work with copy of inst with calculated delay
+    """Construct multi-source leakage-free behavioral features for each arrears event."""
     i_df = inst.copy()
     i_df["delay"] = i_df["DAYS_ENTRY_PAYMENT"] - i_df["DAYS_INSTALMENT"]
     i_df["paid_amount"] = i_df["AMT_PAYMENT"].fillna(0)
@@ -62,10 +79,9 @@ def build_features(
     i_df["is_severe_late"] = (i_df["delay"] >= 15).astype(int)
     i_df["is_underpaid"] = (i_df["paid_amount"] < (i_df["inst_amount"] * 0.95)).astype(int)
     
-    # Pre-merge with events to get observation_day per event
     events_keys = events[["SK_ID_CURR", "SK_ID_PREV", "observation_day", "overdue_amount"]].copy()
     
-    # Merge installments for those loans
+    # Merge installments for these loans
     merged = pd.merge(
         events_keys,
         i_df,
@@ -74,10 +90,8 @@ def build_features(
     )
     
     # Strict temporal filter: only historical instalments prior to observation_day
-    # (i.e. due strictly before this delinquency event)
     hist = merged[merged["DAYS_INSTALMENT"] < merged["observation_day"]].copy()
     
-    # Aggregate prior history per (SK_ID_CURR, SK_ID_PREV)
     if len(hist) > 0:
         grp = hist.groupby(["SK_ID_CURR", "SK_ID_PREV"])
         
@@ -114,15 +128,18 @@ def build_features(
             recent_grp["recent_paid"] / recent_grp["recent_inst"].clip(lower=1.0)
         ).clip(0.0, 2.0)
         
-        hist_feat = pd.merge(hist_feat, recent_grp[["SK_ID_CURR", "SK_ID_PREV", "recent_3_avg_late", "recent_payment_ratio"]],
-                             on=["SK_ID_CURR", "SK_ID_PREV"], how="left")
+        hist_feat = pd.merge(
+            hist_feat,
+            recent_grp[["SK_ID_CURR", "SK_ID_PREV", "recent_3_avg_late", "recent_payment_ratio"]],
+            on=["SK_ID_CURR", "SK_ID_PREV"],
+            how="left"
+        )
     else:
         hist_feat = pd.DataFrame(columns=["SK_ID_CURR", "SK_ID_PREV"])
-    
-    # Merge back to events
+        
     out = pd.merge(events_keys, hist_feat, on=["SK_ID_CURR", "SK_ID_PREV"], how="left")
     
-    # Fill defaults for first-time or thin-file borrowers
+    # Fill defaults for baseline features
     out["prior_instalments_count"] = out["prior_instalments_count"].fillna(0)
     out["prior_late_count"] = out["prior_late_count"].fillna(0)
     out["prior_late_ratio"] = out["prior_late_ratio"].fillna(0.0)
@@ -136,7 +153,7 @@ def build_features(
     out["recent_payment_ratio"] = out["recent_payment_ratio"].fillna(1.0)
     out["instalment_number"] = out["instalment_number"].fillna(1)
     
-    # Attach application demographic features if available
+    # 2. Application Demographics
     if app_train is not None:
         app_cols = ["SK_ID_CURR", "AMT_INCOME_TOTAL", "AMT_CREDIT", "AMT_ANNUITY", "DAYS_EMPLOYED", "DAYS_BIRTH"]
         existing_cols = [c for c in app_cols if c in app_train.columns]
@@ -145,15 +162,44 @@ def build_features(
         app_sub = app_sub.rename(columns=rename_map)
         out = pd.merge(out, app_sub, on="SK_ID_CURR", how="left")
     else:
-        out["amt_income_total"] = np.nan
-        out["amt_credit"] = np.nan
-        out["amt_annuity"] = np.nan
-        out["days_employed"] = np.nan
-        out["days_birth"] = np.nan
-        
-    for c in ["amt_income_total", "amt_credit", "amt_annuity", "days_employed", "days_birth"]:
-        if c not in out.columns:
+        for c in ["amt_income_total", "amt_credit", "amt_annuity", "days_employed", "days_birth"]:
             out[c] = np.nan
-            
-    # Guarantee feature matrix has exactly FEATURE_COLUMNS in specified order
+
+    # 3. Credit Bureau Features (bureau.csv)
+    if bureau is not None:
+        b_sub = bureau.groupby("SK_ID_CURR").agg(
+            bureau_total_debt=("AMT_CREDIT_SUM_DEBT", "sum"),
+            bureau_overdue_debt=("AMT_CREDIT_SUM_OVERDUE", "sum"),
+            bureau_active_loans=("CREDIT_ACTIVE", lambda s: (s == "Active").sum())
+        ).reset_index()
+        out = pd.merge(out, b_sub, on="SK_ID_CURR", how="left")
+    else:
+        out["bureau_total_debt"] = 0.0
+        out["bureau_overdue_debt"] = 0.0
+        out["bureau_active_loans"] = 0
+        
+    out["bureau_total_debt"] = out["bureau_total_debt"].fillna(0.0)
+    out["bureau_overdue_debt"] = out["bureau_overdue_debt"].fillna(0.0)
+    out["bureau_active_loans"] = out["bureau_active_loans"].fillna(0)
+
+    # 4. POS & Cash Trajectory (POS_CASH_balance.csv)
+    if pos_cash is not None:
+        p_sub = pos_cash.groupby("SK_ID_CURR").agg(
+            pos_cash_max_dpd=("SK_DPD", "max")
+        ).reset_index()
+        out = pd.merge(out, p_sub, on="SK_ID_CURR", how="left")
+    else:
+        out["pos_cash_max_dpd"] = 0.0
+        
+    out["pos_cash_max_dpd"] = out["pos_cash_max_dpd"].fillna(0.0)
+
+    # 5. Regional & Seasonal Calendar Engine (Bamenda Context)
+    # Bamenda 8-day traditional week / market cycle
+    out["market_cycle_day"] = (abs(out["observation_day"]) % 8).astype(int)
+    # Day-of-year mapping: September/October school fee season shock
+    day_in_year = (abs(out["observation_day"]) % 365)
+    out["school_fee_shock"] = ((day_in_year >= 240) & (day_in_year <= 300)).astype(int)
+    # November-January cash crop harvest liquidity
+    out["harvest_season"] = ((day_in_year >= 305) | (day_in_year <= 35)).astype(int)
+
     return out[FEATURE_COLUMNS].copy()

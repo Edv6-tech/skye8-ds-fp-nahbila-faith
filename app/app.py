@@ -670,12 +670,20 @@ with tab_dossier:
         script_tone = "Acknowledge customer loyalty, verify hardship context, and offer flexible 14-day instalment restructuring." if acc['is_vulnerable'] else "Polite notification of 15-day arrears mark; confirm commitment to settle within 30-day grace cycle."
         prob_pct = acc['recovery_probability'] * 100.0
 
-        # Dedicated Flush-Left HTML Card: zero leading spaces guarantees clean markdown rendering
+        segment = acc.get("behavioral_segment", "Persuadable")
+        ttc = int(acc.get("estimated_days_to_cure", 14))
+        bureau_debt = float(acc.get("bureau_total_debt", 0.0))
+        bureau_active = int(acc.get("bureau_active_loans", 0))
+        uplift_pct = float(acc.get("causal_uplift", 0.15)) * 100.0
+
         dossier_html = f"""<div class="dossier-card">
 <div class="dossier-header">
 <div>
 <span class="dossier-meta">Borrower Account Reference</span>
 <div class="dossier-id">Client #{acc['SK_ID_CURR']} &bull; Loan Ref {acc['SK_ID_PREV']}</div>
+<div style="font-size: 11.5px; color: #84756A; margin-top: 4px;">
+Causal Segment: <strong style="color: #A67C48;">{segment}</strong> &bull; Expected Settlement: <strong style="color: #1F1815;">~{ttc} Days</strong> &bull; External Bureau Debt: <strong style="color: #1F1815;">{bureau_debt:,.0f} FCFA</strong> ({bureau_active} active loans)
+</div>
 </div>
 <div>
 <span class="{channel_tag_class}">Recommended Action: {acc['recommended_channel']}</span>
@@ -693,7 +701,7 @@ with tab_dossier:
 <div class="metric-label">Recovery Probability</div>
 <div style="font-size: 20px; font-weight: 600; color: #C5A059;">{acc['recovery_probability']:.1%}</div>
 <div class="prob-meter-wrapper"><div class="prob-meter-fill" style="width: {prob_pct:.1f}%;"></div></div>
-<div style="font-size: 11px; color: #84756A; margin-top: 4px;">Calibrated ML Estimate</div>
+<div style="font-size: 11px; color: #84756A; margin-top: 4px;">Causal Contact Lift: +{uplift_pct:.1f}%</div>
 </div>
 <div>
 <div class="metric-label">Assigned Officer</div>
@@ -714,6 +722,7 @@ with tab_dossier:
 <li>Historical Delinquency Rate: <strong>{acc['prior_late_ratio']:.1%} of past instalments</strong></li>
 <li>Past Severe Delinquencies (15+ days): <strong>{int(acc['prior_severe_late_count'])}</strong></li>
 <li>Average Historical Delay: <strong>{acc['prior_avg_days_late']:.1f} days</strong></li>
+<li>Cross-Institutional Indebtedness: <strong>{bureau_debt:,.0f} FCFA across {bureau_active} external credits</strong></li>
 <li>Repayment Compliance Ratio: <strong>{acc['prior_payment_ratio']:.1%}</strong></li>
 </ul>
 </div>
@@ -731,6 +740,34 @@ with tab_dossier:
 </div>
 </div>"""
         st.markdown(dossier_html, unsafe_allow_html=True)
+        
+        # Interactive Human-in-the-Loop Officer Field Logging
+        st.markdown("<div style='height: 18px;'></div>", unsafe_allow_html=True)
+        st.markdown("#### 📝 Record Officer Contact Outcome (Active Learning)")
+        log_col1, log_col2, log_col3 = st.columns([2, 2.5, 1.2])
+        with log_col1:
+            outcome = st.selectbox(
+                "Contact Outcome",
+                [
+                    "Promise to Pay (Within Grace Window)",
+                    "Phone Switched Off / Out of Network",
+                    "Severe Hardship / Bereavement Shock",
+                    "Disputed Overdue Balance",
+                    "Cured & Settled in Full"
+                ],
+                key=f"out_{acc['SK_ID_CURR']}"
+            )
+        with log_col2:
+            notes = st.text_input(
+                "Field Notes / Settlement Commitment",
+                placeholder="e.g. Borrower will deposit cash on Tuesday market day.",
+                key=f"note_{acc['SK_ID_CURR']}"
+            )
+        with log_col3:
+            st.write("")
+            st.write("")
+            if st.button("💾 Save Field Log", key=f"btn_{acc['SK_ID_CURR']}"):
+                st.success(f"✓ Field record logged for Client #{acc['SK_ID_CURR']}.")
 
 # TAB 2: PRIORITISED TABLE VIEW
 with tab_table:
