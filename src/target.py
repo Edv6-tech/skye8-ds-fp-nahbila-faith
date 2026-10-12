@@ -94,3 +94,33 @@ def base_recovery_rate(events: pd.DataFrame) -> float:
     if len(events) == 0:
         return 0.0
     return float(events["recovered"].mean())
+
+
+def build_lending_club_arrears_events(df: pd.DataFrame) -> pd.DataFrame:
+    """Isolate LendingClub arrears population and compute recovery label and overdue amount.
+    
+    Arrears population: loans marked 'Charged Off', 'Default', 'Late (31-120 days)', or 'Late (16-30 days)'.
+    Recovery label: 1 if borrower paid post-delinquency recoveries > 0 or cured, 0 otherwise.
+    """
+    arrears_statuses = ['Charged Off', 'Default', 'Late (31-120 days)', 'Late (16-30 days)']
+    events = df[df['loan_status'].isin(arrears_statuses)].copy()
+    
+    # Overdue amount: unpaid principal balance at delinquency
+    if 'total_rec_prncp' in events.columns and 'loan_amnt' in events.columns:
+        unpaid = events['loan_amnt'] - events['total_rec_prncp'].fillna(0)
+        events['overdue_amount'] = np.maximum(unpaid, events['installment'].fillna(100.0))
+    else:
+        events['overdue_amount'] = events['loan_amnt']
+
+    # Recovery definition: actual recovery of funds post-delinquency
+    recoveries_col = events['recoveries'].fillna(0) if 'recoveries' in events.columns else pd.Series(0, index=events.index)
+    events['recovery_amount'] = recoveries_col
+    events['recovered'] = ((recoveries_col > 0) | (events['loan_status'] == 'Late (16-30 days)')).astype(int)
+
+    # Identifiers for pipeline compatibility
+    events['SK_ID_CURR'] = events['id'].astype(str)
+    events['SK_ID_PREV'] = events['id'].astype(str)
+    events['observation_day'] = 0
+
+    return events.reset_index(drop=True)
+

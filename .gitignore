@@ -10,3 +10,5 @@ kaggle.json
 __pycache__/
 .ipynb_checkpoints/
 .pytest_cache/
+*.exe
+cloudflared.exe

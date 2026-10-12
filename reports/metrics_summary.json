@@ -1,6 +1,6 @@
 {
-  "roc_auc": 0.986372981624798,
-  "pr_auc": 0.9288005508925836,
+  "roc_auc": 0.9864184528646224,
+  "pr_auc": 0.9287860022855213,
   "base_recovery_rate": 0.12235600390497885,
   "total_population": 9219,
   "total_arrears_book_value": 125412849.225,
@@ -11,12 +11,12 @@
       "precision_incumbent": 0.14,
       "precision_random": 0.18,
       "precision_gain_ratio": 6.428571428571428,
-      "money_recovered_ev": 4557608.1,
-      "money_recovered_prob": 493585.82999999996,
+      "money_recovered_ev": 4529712.1049999995,
+      "money_recovered_prob": 313634.29500000004,
       "money_recovered_incumbent": 3301388.0549999997,
       "money_recovered_random": 74075.12999999999,
-      "money_lift_fcfa": 1256220.045,
-      "money_lift_pct": 38.051268862423996
+      "money_lift_fcfa": 1228324.0499999998,
+      "money_lift_pct": 37.206291097457786
     },
     "100": {
       "precision_ev": 0.88,
@@ -24,25 +24,25 @@
       "precision_incumbent": 0.07,
       "precision_random": 0.17,
       "precision_gain_ratio": 12.571428571428571,
-      "money_recovered_ev": 5465543.805000001,
-      "money_recovered_prob": 906831.0000000001,
+      "money_recovered_ev": 5477949.899999999,
+      "money_recovered_prob": 652132.665,
       "money_recovered_incumbent": 3301388.0549999997,
       "money_recovered_random": 181131.12,
-      "money_lift_fcfa": 2164155.750000001,
-      "money_lift_pct": 65.55290423136886
+      "money_lift_fcfa": 2176561.8449999997,
+      "money_lift_pct": 65.9286884407171
     },
     "200": {
-      "precision_ev": 0.855,
+      "precision_ev": 0.86,
       "precision_prob": 1.0,
       "precision_incumbent": 0.055,
       "precision_random": 0.135,
-      "precision_gain_ratio": 15.545454545454545,
-      "money_recovered_ev": 6660599.04,
-      "money_recovered_prob": 1573853.4000000001,
+      "precision_gain_ratio": 15.636363636363637,
+      "money_recovered_ev": 6658286.084999999,
+      "money_recovered_prob": 1511319.87,
       "money_recovered_incumbent": 3544618.4999999995,
       "money_recovered_random": 267152.57999999996,
-      "money_lift_fcfa": 3115980.5400000005,
-      "money_lift_pct": 87.90735984704703
+      "money_lift_fcfa": 3113667.5849999995,
+      "money_lift_pct": 87.84210726767915
     },
     "400": {
       "precision_ev": 0.845,
@@ -50,12 +50,12 @@
       "precision_incumbent": 0.045,
       "precision_random": 0.125,
       "precision_gain_ratio": 18.77777777777778,
-      "money_recovered_ev": 8298520.695,
-      "money_recovered_prob": 5985721.305000001,
+      "money_recovered_ev": 8354121.164999999,
+      "money_recovered_prob": 5122013.535,
       "money_recovered_incumbent": 3863087.1449999996,
       "money_recovered_random": 1486968.525,
-      "money_lift_fcfa": 4435433.550000001,
-      "money_lift_pct": 114.81577773208637
+      "money_lift_fcfa": 4491034.02,
+      "money_lift_pct": 116.25505331436162
     }
   }
 }
