@@ -205,3 +205,39 @@ def test_cobac_and_momo_features():
     assert "Family Guarantor" in diaspora
     assert "75,000 FCFA" in diaspora
     assert "*126*9*" in diaspora
+
+
+def test_competitive_features():
+    from src.contact import (
+        generate_momo_push_api_payload,
+        generate_voice_ai_ivr_dialog,
+        generate_whatsapp_ai_payload,
+        generate_njangi_group_resolution,
+        generate_cobac_audit_manifest
+    )
+    
+    # 1. MoMo Direct Push API
+    momo_push = generate_momo_push_api_payload(50000, 103380, 204551)
+    assert momo_push["provider"] == "MTN_MOMO_DIRECT_PUSH"
+    assert momo_push["payload"]["amount"] == "50000"
+    
+    # 2. Voice AI IVR Dialog
+    v_ivr = generate_voice_ai_ivr_dialog(103380, 204551, 50000, "Officer 1 - John N.", False)
+    assert "dtmf_menu" in v_ivr
+    assert "Press 1" in v_ivr["ivr_pidgin_prompt"]
+    
+    # 3. WhatsApp Business AI Payload
+    wa = generate_whatsapp_ai_payload(103380, 204551, 50000, "Hello Pidgin", "*126*9*#")
+    assert wa["messaging_product"] == "whatsapp"
+    assert "action" in wa["interactive"]
+    
+    # 4. Njangi Group Network
+    nj = generate_njangi_group_resolution(103380, 204551)
+    assert "njangi_group_name" in nj
+    assert "peer_leverage_protocol" in nj
+    
+    # 5. COBAC Audit Manifest
+    cobac_audit = generate_cobac_audit_manifest(100000000.0)
+    assert "cobac_regulation_ref" in cobac_audit
+    assert cobac_audit["statutory_capital_preserved_fcfa"] > 0
+

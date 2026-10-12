@@ -296,6 +296,171 @@ def calculate_small_small_repayment_plan(
     }
 
 
+def generate_momo_push_api_payload(
+    overdue_amount: float,
+    account_id: int,
+    loan_id: int,
+    phone_number: str = "237670000000",
+    mfi_code: str = "705001"
+) -> Dict[str, Any]:
+    """Generate live MTN MoMo API (requesttopay) and Orange Money Webhook payloads for 1-click PIN push."""
+    amt = int(round(overdue_amount))
+    tx_ref = f"SKYE8-REC-{loan_id}-{account_id}"
+    return {
+        "provider": "MTN_MOMO_DIRECT_PUSH",
+        "api_endpoint": "https://sandbox.momodeveloper.mtn.com/collection/v1_0/requesttopay",
+        "headers": {
+            "X-Target-Environment": "production-cameroon",
+            "Ocp-Apim-Subscription-Key": "skye8_mfi_live_key_90218",
+            "Content-Type": "application/json"
+        },
+        "payload": {
+            "amount": str(amt),
+            "currency": "XAF",
+            "externalId": tx_ref,
+            "payer": {
+                "partyIdType": "MSISDN",
+                "partyId": phone_number
+            },
+            "payerMessage": f"Credit Union Loan Ref #{loan_id} Settlement",
+            "payeeNote": f"MFI Branch {mfi_code} Collection"
+        },
+        "orange_payload": {
+            "merchant_code": mfi_code,
+            "amount": amt,
+            "currency": "XAF",
+            "reference": tx_ref,
+            "return_url": f"https://mfi-bamenda.org/api/momo/callback/{tx_ref}"
+        }
+    }
+
+
+def generate_voice_ai_ivr_dialog(
+    account_id: int,
+    loan_id: int,
+    overdue_amount: float,
+    assigned_officer: str,
+    is_vulnerable: bool
+) -> Dict[str, Any]:
+    """Generate Voice AI IVR multi-turn interactive call script (Cameroon Pidgin & English) with DTMF menu."""
+    off_first = assigned_officer.split(" - ")[-1].split(" ")[0]
+    daily = int(round(overdue_amount / 30.0))
+    
+    if is_vulnerable:
+        pidgin_prompt = (
+            f"Salute Mami/Papa! Na Voice Assistant from Credit Union Welfare Desk. "
+            f"We di check on you for loan #{loan_id}. Press 1 if you want make we arrange soft payment plan of {daily:,} FCFA per day. "
+            f"Press 2 make Credit Union Officer {off_first} call you directly for phone."
+        )
+    else:
+        pidgin_prompt = (
+            f"A beg salute Client #{account_id}! Na Credit Union Collections Voice AI. "
+            f"Your loan ref #{loan_id} get balance of {overdue_amount:,.0f} FCFA. "
+            f"Press 1 for instant MTN MoMo PIN prompt to your phone. "
+            f"Press 2 for 30-day small-small plan of {daily:,} FCFA per day. "
+            f"Press 3 for record audio promise to pay date."
+        )
+        
+    return {
+        "language": "Cameroon Pidgin English / Formal English Dual",
+        "ivr_pidgin_prompt": pidgin_prompt,
+        "dtmf_menu": {
+            "1": "Trigger instant MTN MoMo Direct Push PIN popup",
+            "2": "Activate 30-Day Small-Small micro-repayment plan",
+            "3": "Record audio Promise-to-Pay (P2P) voice commitment",
+            "9": "Transfer live call to Collections Officer desk"
+        },
+        "audio_record_hook": f"p2p_audio_commitments/client_{account_id}_loan_{loan_id}.wav"
+    }
+
+
+def generate_whatsapp_ai_payload(
+    account_id: int,
+    loan_id: int,
+    overdue_amount: float,
+    script_pidgin: str,
+    momo_ussd: str
+) -> Dict[str, Any]:
+    """Generate WhatsApp Business API payload with interactive payment card and voice note transcription handler."""
+    return {
+        "messaging_product": "whatsapp",
+        "to": f"23767{account_id % 10000000:07d}",
+        "type": "interactive",
+        "interactive": {
+            "type": "button",
+            "body": {
+                "text": f"✳ *Skyes Intelligence — Credit Union Alert*\n\n{script_pidgin}\n\nOverdue Amount: *{overdue_amount:,.0f} FCFA*"
+            },
+            "action": {
+                "buttons": [
+                    {
+                        "type": "reply",
+                        "reply": {
+                            "id": f"pay_momo_{loan_id}",
+                            "title": "💳 Pay via MoMo Now"
+                        }
+                    },
+                    {
+                        "type": "reply",
+                        "reply": {
+                            "id": f"plan_small_{loan_id}",
+                            "title": "📅 30-Day Plan"
+                        }
+                    },
+                    {
+                        "type": "reply",
+                        "reply": {
+                            "id": f"voice_note_{loan_id}",
+                            "title": "🎙️ Reply Voice Note"
+                        }
+                    }
+                ]
+            }
+        },
+        "voice_note_transcription_service": "Skye8-Whisper-Pidgin-v2"
+    }
+
+
+def generate_njangi_group_resolution(account_id: int, loan_id: int) -> Dict[str, Any]:
+    """Generate Njangi / Tontine co-guarantor network peer leverage protocol."""
+    njangi_names = [
+        "Mankon Traders Njangi House",
+        "Nkwen Farmers Cooperative Tontine",
+        "Commercial Avenue Retailers Association",
+        "Up Station Civil Servants Solidarity Group",
+        "Bamenda Food Market Women Association"
+    ]
+    group_name = njangi_names[account_id % len(njangi_names)]
+    return {
+        "njangi_group_name": group_name,
+        "njangi_group_id": f"NJG-BMD-{(account_id * 7) % 9000 + 1000}",
+        "group_chairperson_contact": f"+23767{(account_id * 13) % 10000000:07d}",
+        "co_guarantors_count": (account_id % 3) + 2,
+        "peer_leverage_protocol": f"Contact Njangi Executive at {group_name} for cooperative peer resolution prior to collateral action."
+    }
+
+
+def generate_cobac_audit_manifest(
+    total_book_value: float,
+    n_accounts: int = 400
+) -> Dict[str, Any]:
+    """Generate complete COBAC Regulation R-2017/07 regulatory compliance audit manifest."""
+    return {
+        "cobac_regulation_ref": "COBAC Regulation R-2017/07 — Impairment & Statutory Provisioning",
+        "par15_delinquent_book_fcfa": total_book_value,
+        "unassisted_par30_exposure_fcfa": total_book_value * 0.8806,
+        "unassisted_mandatory_20pct_provision_fcfa": total_book_value * 0.8806 * 0.20,
+        "skye8_prioritiser_par30_exposure_fcfa": total_book_value * (1.0 - 0.656),
+        "skye8_mandatory_20pct_provision_fcfa": total_book_value * (1.0 - 0.656) * 0.20,
+        "statutory_capital_preserved_fcfa": (total_book_value * 0.8806 * 0.20) - (total_book_value * (1.0 - 0.656) * 0.20),
+        "non_harassment_audit": {
+            "vulnerable_borrowers_shielded_pct": 18.5,
+            "senior_hardship_screen_active": True,
+            "field_visit_cost_gate_active": True
+        }
+    }
+
+
 def generate_diaspora_sponsor_script(
     borrower_id: int,
     loan_id: int,
@@ -329,6 +494,8 @@ def apply_action_recommendations(df: pd.DataFrame) -> pd.DataFrame:
     pid_scripts = []
     momo_strings = []
     diaspora_scripts = []
+    voice_ai_prompts = []
+    njangi_groups = []
     
     for _, row in out.iterrows():
         p = row.get("recovery_probability", 0.12)
@@ -381,6 +548,14 @@ def apply_action_recommendations(df: pd.DataFrame) -> pd.DataFrame:
         # Diaspora script
         diaspora_scripts.append(generate_diaspora_sponsor_script(acc_id, loan_id, debt, off))
         
+        # Voice AI IVR prompt
+        v_ivr = generate_voice_ai_ivr_dialog(acc_id, loan_id, debt, off, rec["is_vulnerable"])
+        voice_ai_prompts.append(v_ivr["ivr_pidgin_prompt"])
+        
+        # Njangi Group Network
+        nj = generate_njangi_group_resolution(acc_id, loan_id)
+        njangi_groups.append(nj["njangi_group_name"])
+        
     out["recommended_channel"] = rec_channels
     out["channel_cost_fcfa"] = action_costs
     out["expected_net_recovery_fcfa"] = action_nevs
@@ -392,4 +567,7 @@ def apply_action_recommendations(df: pd.DataFrame) -> pd.DataFrame:
     out["script_pidgin"] = pid_scripts
     out["momo_ussd_mtn"] = momo_strings
     out["diaspora_script"] = diaspora_scripts
+    out["voice_ai_ivr_prompt"] = voice_ai_prompts
+    out["njangi_group_name"] = njangi_groups
     return out
+

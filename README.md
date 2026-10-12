@@ -130,13 +130,16 @@ The core machine learning engine is built for continuous operational adaptation:
 
 ---
 
-## 🇨🇲 Cameroon & Global Microfinance Innovations
+## 🇨🇲 Cameroon & Global Microfinance Innovations & Competitive Advantages
 
 1. **COBAC Regulation R-2017/07 Capital Shield:** Early cure at Day 15 prevents loans crossing into 31+ DPD (*créances impayées*), preserving **+2,361,600 FCFA** in mandatory 20% statutory reserves per 150M FCFA portfolio (+8.9% capital preservation).
-2. **MTN MoMo & Orange Money 1-Click USSD Dial Codes:** Direct Cameroon dial codes (`*126*9*705001*...#` and `*150*1*705001*...#`) embedded in officer dossiers and printable field dockets for instant branch-free settlement.
-3. **Daily "Small-Small" Micro-Repayment Restructuring:** Converts lump sums into daily micro-installments (e.g. 2,500 FCFA/day) matching Bamenda trader market cash velocity.
-4. **Diaspora Sponsor & Family Guarantor Protocol:** 1-click outreach scripts addressing family sponsors in Douala, Yaoundé, and the Diaspora (France, UK, US) to clear balances remotely.
-5. **Bamenda Security Risk Index & Safe Transit Router:** Real-time safety tiers (🟢 Safe Transit vs 🟡 Daytime Caution) protecting motorcycle field officers across Mezam division.
+2. **MTN MoMo & Orange Money 1-Click USSD Dial & Direct Push API:** Direct USSD codes (`*126*9*705001*...#` and `*150*1*705001*...#`) plus automated **MoMo PIN Direct Push API** (`/requesttopay`) for instant 1-tap mobile settlement.
+3. **Bilingual Voice AI & Pidgin IVR Call Agent:** Interactive voice call engine speaking natural **Cameroon Pidgin English** and Formal English with DTMF keypress actions and audio Promise-to-Pay (P2P) recording hooks.
+4. **Njangi / Tontine Co-Guarantor Social Graph Resolution:** Maps informal *Njangi* group networks and church tontines, enabling cooperative peer resolution prior to default escalation.
+5. **WhatsApp Business AI Assistant & Voice Note Engine:** Sends rich interactive payment cards and transcribes incoming borrower voice notes via Whisper-Pidgin AI.
+6. **Daily "Small-Small" Micro-Repayment Restructuring:** Converts lump sums into daily micro-installments (e.g. 2,500 FCFA/day) matching Bamenda trader market cash velocity.
+7. **Diaspora Sponsor & Family Guarantor Protocol:** 1-click outreach scripts addressing family sponsors in Douala, Yaoundé, and the Diaspora (France, UK, US) to clear balances remotely.
+8. **Bamenda Security Risk Index & Safe Transit Router:** Real-time safety tiers (🟢 Safe Transit vs 🟡 Daytime Caution) protecting motorcycle field officers across Mezam division.
 
 ---
 

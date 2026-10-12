@@ -29,20 +29,24 @@ FEATURE_COLUMNS = [
     "recent_3_avg_late",
     "recent_payment_ratio",
     "instalment_number",
-    
+
     # Borrower Application Demographics
     "amt_income_total",
     "amt_credit",
     "amt_annuity",
     "days_employed",
     "days_birth",
-    
+
+    # Derived Affordability Ratios
+    "annuity_income_ratio",    # monthly burden vs income
+    "overdue_income_ratio",    # stress: how big is arrears vs income
+
     # Multi-Source Relational Features (Bureau & POS)
     "bureau_total_debt",
-    "bureau_overdue_debt",
+    "bureau_overdue_debt",     # previously computed but never used — now active
     "bureau_active_loans",
     "pos_cash_max_dpd",
-    
+
     # Regional & Seasonal Calendar Features (Bamenda Context)
     "market_cycle_day",
     "school_fee_shock",
@@ -113,9 +117,26 @@ def build_features(
         hist_feat["prior_payment_ratio"] = (
             hist_feat["prior_total_paid"] / hist_feat["prior_total_inst"].clip(lower=1.0)
         ).clip(0.0, 2.0)
-        hist_feat["prior_recovered_before"] = (
-            hist_feat["prior_severe_late_count"] > 0
-        ).astype(int)
+
+        # Fix: prior_recovered_before = borrower had a severe late event AND then
+        # made a subsequent on-time payment (genuine cure demonstrated).
+        # We detect this by checking that after any severe-late instalment, at least
+        # one instalment was paid on time (delay <= 0).
+        def _was_ever_cured(group: pd.DataFrame) -> int:
+            group = group.sort_values("DAYS_INSTALMENT")
+            had_severe = False
+            for _, r in group.iterrows():
+                if r["is_severe_late"]:
+                    had_severe = True
+                elif had_severe and r["delay"] <= 0:
+                    return 1   # severe late followed by on-time = cured before
+            return 0
+
+        cured_flag = hist.groupby(["SK_ID_CURR", "SK_ID_PREV"]).apply(_was_ever_cured).reset_index()
+        cured_flag.columns = ["SK_ID_CURR", "SK_ID_PREV", "prior_recovered_before"]
+        hist_feat = hist_feat.drop(columns=["prior_recovered_before"], errors="ignore")
+        hist_feat = pd.merge(hist_feat, cured_flag, on=["SK_ID_CURR", "SK_ID_PREV"], how="left")
+        hist_feat["prior_recovered_before"] = hist_feat["prior_recovered_before"].fillna(0).astype(int)
         
         # Recent trend: last 3 installments
         recent = hist.sort_values("DAYS_INSTALMENT").groupby(["SK_ID_CURR", "SK_ID_PREV"]).tail(3)
@@ -190,16 +211,21 @@ def build_features(
         out = pd.merge(out, p_sub, on="SK_ID_CURR", how="left")
     else:
         out["pos_cash_max_dpd"] = 0.0
-        
+
     out["pos_cash_max_dpd"] = out["pos_cash_max_dpd"].fillna(0.0)
 
     # 5. Regional & Seasonal Calendar Engine (Bamenda Context)
-    # Bamenda 8-day traditional week / market cycle
+    # Use absolute days modulo 8 for the traditional Bamenda 8-day market cycle
     out["market_cycle_day"] = (abs(out["observation_day"]) % 8).astype(int)
-    # Day-of-year mapping: September/October school fee season shock
+    # Day-of-year mapping: September/October school fee season shock (days 240-300)
     day_in_year = (abs(out["observation_day"]) % 365)
     out["school_fee_shock"] = ((day_in_year >= 240) & (day_in_year <= 300)).astype(int)
-    # November-January cash crop harvest liquidity
+    # November-January cash crop harvest liquidity boost
     out["harvest_season"] = ((day_in_year >= 305) | (day_in_year <= 35)).astype(int)
+
+    # 6. Derived Affordability Ratios
+    eps = 1e-6
+    out["annuity_income_ratio"] = (out["amt_annuity"].fillna(0.0) / (out["amt_income_total"].fillna(eps) + eps)).clip(0.0, 5.0)
+    out["overdue_income_ratio"] = (out["overdue_amount"].fillna(0.0) / (out["amt_income_total"].fillna(eps) + eps)).clip(0.0, 10.0)
 
     return out[FEATURE_COLUMNS].copy()

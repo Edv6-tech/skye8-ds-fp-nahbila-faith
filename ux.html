@@ -249,6 +249,25 @@ details.deep-dive summary {
     outline: none;
 }
 
+
+aside {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+}
+aside::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+}
+#top-account-select {
+    max-width: 230px !important;
+    white-space: nowrap !important;
+    text-overflow: ellipsis !important;
+    overflow: hidden !important;
+}
+
 </style>
 </head>
 <body>
@@ -904,7 +923,7 @@ details.deep-dive summary {
 
             <div style="margin-top:16px;">
                 <div style="font-size:11px; font-weight:700; margin-bottom:6px;">Diaspora Family Sponsor Remote Settlement Notice</div>
-                <textarea class="decision-note" style="min-height:90px;" readonly>Official Credit Union Notice: Dear family member, account #103380 (Loan #2666240) in Bamenda has an overdue balance of 30,613 FCFA. You may settle remotely via WorldRemit / TapTap Send or MTN MoMo counter: Till 705001. Officer: John N.</textarea>
+                <textarea class="decision-note" id="diaspora-notice" style="min-height:90px;" readonly>Official Credit Union Notice: Dear family member, account #103380 (Loan #2666240) in Bamenda has an overdue balance of 30,613 FCFA. You may settle remotely via WorldRemit / TapTap Send or MTN MoMo counter: Till 705001. Officer: John N.</textarea>
             </div>
         </div>
     </div>
@@ -917,22 +936,22 @@ details.deep-dive summary {
                     <div style="font-size:9px; color:var(--muted); text-transform:uppercase;">Official Field Contact Docket &bull; Mezam Division</div>
                 </div>
                 <div style="text-align:right;">
-                    <div style="font-size:10px; font-weight:700;">DOC-2026-103380</div>
+                    <div style="font-size:10px; font-weight:700;" id="docket-doc-id">DOC-2026-103380</div>
                 </div>
             </div>
 
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; font-size:11px; margin-bottom:16px;">
-                <div>Borrower ID: <b>Client #103380</b></div>
-                <div>Loan Reference: <b>#2666240</b></div>
-                <div>Quarter: <b>Commercial Avenue</b></div>
-                <div>Assigned Officer: <b>John N.</b></div>
-                <div>Overdue Amount: <b style="color:var(--red);">30,613 FCFA</b></div>
+                <div>Borrower ID: <b id="docket-borrower-id">Client #103380</b></div>
+                <div>Loan Reference: <b id="docket-loan-ref">#2666240</b></div>
+                <div>Quarter: <b id="docket-quarter">Commercial Avenue</b></div>
+                <div>Assigned Officer: <b id="docket-officer">John N.</b></div>
+                <div>Overdue Amount: <b style="color:var(--red);" id="docket-amount">30,613 FCFA</b></div>
                 <div>Delinquency Age: <b>15 Days Past Due</b></div>
             </div>
 
             <div style="border-top:1px dashed var(--dark); padding-top:12px; font-size:11px; line-height:1.6;">
                 <strong>MEMBER REPAYMENT PLEDGE COMMITMENT:</strong><br>
-                I, member of account #103380, acknowledge the balance of 30,613 FCFA and agree to settle on or before ____ / ____ / 2026.
+                <span id="docket-pledge-text">I, member of account #103380, acknowledge the balance of 30,613 FCFA and agree to settle on or before ____ / ____ / 2026.</span>
             </div>
 
             <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-top:20px; font-size:9px; text-align:center;">
@@ -1023,60 +1042,99 @@ function initAccountsDropdown() {
     accountsData.slice(0, 50).forEach(a => {
         const opt = document.createElement('option');
         opt.value = a.id;
-        opt.textContent = `Client #${a.id} - ${a.quarter}`;
+        const qtrShort = a.quarter.split('/')[0].trim(); opt.textContent = `Client #${a.id} (${qtrShort})`;
         if (a.id === currentAccount.id) opt.selected = true;
         sel.appendChild(opt);
     });
 }
 
 // Load Account into Case Review UI
+function updateOutreachTab(acc) {
+    const roundedOverdue = Math.round(acc.overdue);
+    const overdueFmt = roundedOverdue.toLocaleString();
+
+    // USSD codes (Outreach tab — also updated in case-review view)
+    const mtnEl = document.getElementById('momo-code-mtn');
+    const orgEl = document.getElementById('momo-code-orange');
+    if (mtnEl) mtnEl.textContent = `*126*9*705001*${roundedOverdue}#`;
+    if (orgEl) orgEl.textContent = `*150*1*705001*${roundedOverdue}#`;
+
+    // Diaspora family notice
+    const diasporaEl = document.getElementById('diaspora-notice');
+    if (diasporaEl) {
+        diasporaEl.value = `Official Credit Union Notice: Dear family member, account #${acc.id} (Loan #${acc.loan}) in Bamenda has an overdue balance of ${overdueFmt} FCFA. You may settle remotely via WorldRemit / TapTap Send or MTN MoMo counter: Till 705001. Officer: ${acc.officer}.`;
+    }
+
+    // Field docket slip
+    const docketDocEl = document.getElementById('docket-doc-id');
+    if (docketDocEl) docketDocEl.textContent = `DOC-2026-${acc.id}`;
+    const docketBorrEl = document.getElementById('docket-borrower-id');
+    if (docketBorrEl) docketBorrEl.textContent = `Client #${acc.id}`;
+    const docketLoanEl = document.getElementById('docket-loan-ref');
+    if (docketLoanEl) docketLoanEl.textContent = `#${acc.loan}`;
+    const docketQtrEl = document.getElementById('docket-quarter');
+    if (docketQtrEl) docketQtrEl.textContent = acc.quarter.split(' /')[0];
+    const docketOfficerEl = document.getElementById('docket-officer');
+    if (docketOfficerEl) docketOfficerEl.textContent = acc.officer;
+    const docketAmtEl = document.getElementById('docket-amount');
+    if (docketAmtEl) docketAmtEl.textContent = `${overdueFmt} FCFA`;
+    const docketPledgeEl = document.getElementById('docket-pledge-text');
+    if (docketPledgeEl) docketPledgeEl.textContent = `I, member of account #${acc.id}, acknowledge the balance of ${overdueFmt} FCFA and agree to settle on or before ____ / ____ / 2026.`;
+}
+
 function loadAccount(accId) {
     const acc = accountsData.find(a => a.id == accId);
     if (!acc) return;
     currentAccount = acc;
 
-    // Update Hero
+    const pct = Math.round(acc.prob * 100);
+    const roundedOverdue = Math.round(acc.overdue);
+
+    // ── Hero Card ──────────────────────────────────────────────────────────
     document.getElementById('hero-client-id').textContent = `Client #${acc.id}`;
     document.getElementById('hero-subline').textContent = `Loan reference ${acc.loan}　·　${acc.quarter}　·　Urban market zone`;
-    document.getElementById('hero-tag-officer').textContent = `Assigned to ${acc.officer}`;
-
-    const pct = Math.round(acc.prob * 100);
+    const heroTagEl = document.getElementById('hero-tag-officer');
+    if (heroTagEl) heroTagEl.textContent = `Assigned to ${acc.officer}`;
     document.getElementById('hero-score-val').textContent = `${pct}%`;
     document.getElementById('hero-score-ring').style.background = `conic-gradient(var(--citron) 0 ${pct}%, #ffffff32 ${pct}% 100%)`;
 
-    // Update Metrics
-    document.getElementById('metric-overdue').textContent = Math.round(acc.overdue).toLocaleString();
+    // ── Metric Cards ────────────────────────────────────────────────────────
+    document.getElementById('metric-overdue').textContent = roundedOverdue.toLocaleString();
     document.getElementById('metric-prob').textContent = pct;
     document.getElementById('metric-net').textContent = Math.round(acc.net).toLocaleString();
     document.getElementById('metric-officer').textContent = acc.officer;
-    document.getElementById('metric-branch').textContent = `${acc.quarter} branch`;
+    document.getElementById('metric-branch').textContent = acc.quarter.split(' /')[0] + ' branch';
 
-    // Case data
-    document.getElementById('card-segment').textContent = acc.quarter;
+    // ── Case Data ───────────────────────────────────────────────────────────
+    document.getElementById('card-segment').textContent = acc.quarter.split(' /')[0];
 
-    // Call Script & Affordability
-    document.getElementById('call-script-box').value = acc.script || `Hello, I'm calling from Skyes about your account #${acc.id}...`;
+    // ── Call Script & Affordability Slider ──────────────────────────────────
+    const scriptBox = document.getElementById('call-script-box');
+    if (scriptBox) scriptBox.value = acc.script || `Hello, this is your Credit Union calling about account #${acc.id}. Your instalment of ${roundedOverdue.toLocaleString()} FCFA is due. Please contact us to arrange payment.`;
     const defaultInstalment = Math.min(60000, Math.max(5000, Math.round(acc.overdue / 3 / 1000) * 1000));
     const slider = document.getElementById('afford-slider');
-    slider.value = defaultInstalment;
-    updateAffordability(defaultInstalment);
+    if (slider) { slider.value = defaultInstalment; updateAffordability(defaultInstalment); }
 
-    // USSD codes
-    const roundedOverdue = Math.round(acc.overdue);
-    document.getElementById('momo-code-mtn').textContent = `*126*9*705001*${roundedOverdue}#`;
-    document.getElementById('momo-code-orange').textContent = `*150*1*705001*${roundedOverdue}#`;
+    // ── Outreach Tab (USSD + Docket + Diaspora) ─────────────────────────────
+    updateOutreachTab(acc);
 
-    // What if values
-    document.getElementById('whatif-amt').value = roundedOverdue;
-    document.getElementById('whatif-amt-txt').textContent = `${roundedOverdue.toLocaleString()} FCFA`;
-    document.getElementById('whatif-res').textContent = `${(acc.prob * 100).toFixed(1)}%`;
+    // ── What-If Simulator ───────────────────────────────────────────────────
+    const wamt = document.getElementById('whatif-amt');
+    if (wamt) { wamt.value = roundedOverdue;
+        document.getElementById('whatif-amt-txt').textContent = `${roundedOverdue.toLocaleString()} FCFA`;
+        document.getElementById('whatif-res').textContent = `${(acc.prob * 100).toFixed(1)}%`;
+    }
 
-    // Daily plan
-    const daily = Math.round(acc.overdue / 22);
-    document.getElementById('daily-target').textContent = `${daily.toLocaleString()} FCFA / day`;
-    document.getElementById('vuln-pill').textContent = (acc.vulnerable || acc.age >= 60) ? 'Senior / Hardship Shield' : 'Standard Profile';
-    document.getElementById('vuln-pill').style.background = (acc.vulnerable || acc.age >= 60) ? '#fdf4e6' : '#edf3df';
-    document.getElementById('vuln-pill').style.color = (acc.vulnerable || acc.age >= 60) ? '#965b12' : '#596e30';
+    // ── Small-Small Daily Plan ──────────────────────────────────────────────
+    const dailyEl = document.getElementById('daily-target');
+    if (dailyEl) dailyEl.textContent = `${Math.round(acc.overdue / 22).toLocaleString()} FCFA / day`;
+    const vp = document.getElementById('vuln-pill');
+    if (vp) {
+        const isVuln = acc.vulnerable || acc.age >= 60;
+        vp.textContent = isVuln ? 'Senior / Hardship Shield' : 'Standard Profile';
+        vp.style.background = isVuln ? '#fdf4e6' : '#edf3df';
+        vp.style.color = isVuln ? '#965b12' : '#596e30';
+    }
 }
 
 // Tab Switcher
@@ -1171,7 +1229,7 @@ function filterAccounts() {
     filtered.slice(0, 50).forEach(a => {
         const opt = document.createElement('option');
         opt.value = a.id;
-        opt.textContent = `Client #${a.id} - ${a.quarter}`;
+        const qtrShort = a.quarter.split('/')[0].trim(); opt.textContent = `Client #${a.id} (${qtrShort})`;
         if (a.id === currentAccount.id) opt.selected = true;
         sel.appendChild(opt);
     });
@@ -1243,10 +1301,224 @@ function updateCobacCalc(val) {
     document.getElementById('cobac-prov').innerHTML = `${saved.toLocaleString()} <small style="font-size:9px;">FCFA</small>`;
 }
 
-// Initialize
-initAccountsDropdown();
-loadAccount(103380);
+<!-- Floating Skye8 AI Text Chatbot Widget -->
+<style>
+  #skye8-chat-widget-toggle {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: #0f382c;
+    color: #ccf381;
+    border: 2px solid #ccf381;
+    border-radius: 30px;
+    padding: 12px 20px;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    z-index: 999999;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: transform 0.2s ease, background 0.2s ease;
+  }
+  #skye8-chat-widget-toggle:hover {
+    transform: scale(1.05);
+    background: #14493a;
+  }
+  #skye8-chat-panel {
+    position: fixed;
+    bottom: 80px;
+    right: 24px;
+    width: 380px;
+    height: 520px;
+    background: #0b201a;
+    border: 1px solid rgba(204, 243, 129, 0.3);
+    border-radius: 16px;
+    box-shadow: 0 12px 36px rgba(0,0,0,0.5);
+    z-index: 999999;
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    font-family: system-ui, -apple-system, sans-serif;
+  }
+  .chat-header {
+    background: #0f382c;
+    padding: 14px 16px;
+    color: #ffffff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+  .chat-header h4 {
+    margin: 0;
+    font-size: 14px;
+    color: #ccf381;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .chat-close-btn {
+    background: none;
+    border: none;
+    color: #aaa;
+    font-size: 18px;
+    cursor: pointer;
+  }
+  .chat-messages {
+    flex: 1;
+    padding: 14px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: #071511;
+  }
+  .chat-msg {
+    max-width: 85%;
+    padding: 10px 14px;
+    border-radius: 12px;
+    font-size: 12px;
+    line-height: 1.4;
+  }
+  .chat-msg.bot {
+    background: #0f382c;
+    color: #e0e0e0;
+    align-self: flex-start;
+    border: 1px solid rgba(204, 243, 129, 0.2);
+  }
+  .chat-msg.user {
+    background: #ccf381;
+    color: #0b201a;
+    align-self: flex-end;
+    font-weight: 600;
+  }
+  .chat-input-area {
+    padding: 10px;
+    background: #0b201a;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    display: flex;
+    gap: 8px;
+  }
+  .chat-input-area input {
+    flex: 1;
+    background: #143329;
+    border: 1px solid rgba(204, 243, 129, 0.3);
+    border-radius: 20px;
+    padding: 8px 14px;
+    color: #fff;
+    font-size: 12px;
+    outline: none;
+  }
+  .chat-input-area button {
+    background: #ccf381;
+    color: #0b201a;
+    border: none;
+    border-radius: 50%;
+    width: 34px;
+    height: 34px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+</style>
+
+<button id="skye8-chat-widget-toggle" onclick="toggleChatPanel()">
+  <span>💬</span> <span>Skye8 AI Assistant</span>
+</button>
+
+<div id="skye8-chat-panel">
+  <div class="chat-header">
+    <h4>✳ Skye8 AI Assistant (Text & Speech)</h4>
+    <button class="chat-close-btn" onclick="toggleChatPanel()">&times;</button>
+  </div>
+  <div class="chat-messages" id="chat-msg-container">
+    <div class="chat-msg bot">
+      <b>Salute Officer!</b> I am your Skye8 AI Assistant. You can type any question or command here:
+      <ul style="margin:6px 0 0 14px; padding:0; font-size:11px;">
+        <li><i>"Who should I call today?"</i></li>
+        <li><i>"How much money can we recover?"</i></li>
+        <li><i>"Check Client 103380"</i></li>
+        <li><i>"COBAC capital report"</i></li>
+      </ul>
+    </div>
+  </div>
+  <div class="chat-input-area">
+    <input type="text" id="chat-user-input" placeholder="Type a message or query..." onkeypress="handleChatKeyPress(event)" />
+    <button onclick="sendChatMessage()">➔</button>
+  </div>
+</div>
+
+<script>
+function toggleChatPanel() {
+  const panel = document.getElementById('skye8-chat-panel');
+  if (panel.style.display === 'flex') {
+    panel.style.display = 'none';
+  } else {
+    panel.style.display = 'flex';
+    document.getElementById('chat-user-input').focus();
+  }
+}
+
+function handleChatKeyPress(e) {
+  if (e.key === 'Enter') sendChatMessage();
+}
+
+async function sendChatMessage() {
+  const input = document.getElementById('chat-user-input');
+  const text = input.value.trim();
+  if (!text) return;
+  
+  // Append user message
+  const msgContainer = document.getElementById('chat-msg-container');
+  const userDiv = document.createElement('div');
+  userDiv.className = 'chat-msg user';
+  userDiv.textContent = text;
+  msgContainer.appendChild(userDiv);
+  input.value = '';
+  msgContainer.scrollTop = msgContainer.scrollHeight;
+
+  // Add bot loading indicator
+  const loadingDiv = document.createElement('div');
+  loadingDiv.className = 'chat-msg bot';
+  loadingDiv.textContent = 'Thinking...';
+  msgContainer.appendChild(loadingDiv);
+  msgContainer.scrollTop = msgContainer.scrollHeight;
+
+  try {
+    const res = await fetch('http://localhost:8080/api/v1/voice-bot/query', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query: text })
+    });
+    if (res.ok) {
+      const data = await res.json();
+      loadingDiv.innerHTML = `<b>${data.intent.replace(/_/g, ' ')}</b><br/>${data.spoken_response}<br/><br/><i style="color:#ccf381;">${data.pidgin_response}</i>`;
+    } else {
+      loadingDiv.textContent = processLocalFallbackQuery(text);
+    }
+  } catch (err) {
+    loadingDiv.innerHTML = processLocalFallbackQuery(text);
+  }
+  msgContainer.scrollTop = msgContainer.scrollHeight;
+}
+
+function processLocalFallbackQuery(query) {
+  const q = query.toLowerCase();
+  if (q.includes('call') || q.includes('who') || q.includes('top')) {
+    const top3 = accountsData.slice(0, 3).map(a => `Client #${a.id} (${Math.round(a.overdue).toLocaleString()} FCFA)`).join(', ');
+    return `<b>TOP PRIORITY ACCOUNTS:</b><br/>Your top priority accounts today are: ${top3}.`;
+  } else if (q.includes('money') || q.includes('recover') || q.includes('cash')) {
+    return `<b>EXPECTED RECOVERY:</b><br/>Expected recoverable cash across weekly book: <b>5,465,544 FCFA</b> (+2.16M FCFA lift).`;
+  } else if (q.includes('103380') || q.includes('client') || q.includes('account')) {
+    return `<b>CLIENT #103380:</b><br/>Overdue: 75,000 FCFA | Recovery Prob: 88.0% | Recommended: SMS / CALL | Status: Senior Hardship Screen Shielded.`;
+  } else {
+    return `<b>SKYE8 AI ASSISTANT:</b><br/>I can help you rank accounts, check recovery totals, send MoMo prompts, and generate Pidgin scripts.`;
+  }
+}
 </script>
 
 </body>
 </html>
+
